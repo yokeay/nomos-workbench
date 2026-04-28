@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 import { Inter, JetBrains_Mono } from 'next/font/google';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { ToastProvider } from '@/hooks/use-toast';
+import { Toaster } from '@/components/ui/toaster';
+import { ErrorBoundary } from '@/components/error-boundary';
 import './globals.css';
 
 const inter = Inter({
@@ -31,7 +34,12 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${jetbrainsMono.variable} h-full antialiased bg-background text-foreground font-sans`}
       >
-        <TooltipProvider>{children}</TooltipProvider>
+        <ErrorBoundary>
+          <ToastProvider>
+            <TooltipProvider>{children}</TooltipProvider>
+            <Toaster />
+          </ToastProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );

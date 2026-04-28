@@ -1,6 +1,6 @@
 import { auth } from '@/lib/auth';
 import { db, aiConfigs, chatSessions, chatMessages, timelineAiEvents } from '@/lib/db';
-import { createAIProvider, buildSystemPrompt } from '@/lib/ai';
+import { createAIProvider, buildSystemPrompt, AIError } from '@/lib/ai';
 import { decrypt } from '@/lib/crypto';
 import { loadKnowledgeFiles } from '@/lib/knowledge';
 import { eq, and, desc } from 'drizzle-orm';
@@ -150,7 +150,8 @@ export async function POST(request: NextRequest) {
 
         } catch (error) {
           console.error('AI streaming error:', error);
-          controller.error(error);
+          const errMsg = error instanceof AIError ? error.message : 'AI error';
+          controller.enqueue(encoder.encode(`\n\nError: ${errMsg}`));
         } finally {
           controller.close();
         }
@@ -166,6 +167,16 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Chat API error:', error);
+    if (error instanceof AIError) {
+      const codeMap: Record<string, number> = { AUTH_ERROR: 2003, RATE_LIMIT: 2004, UNKNOWN: 2001 };
+      const statusMap: Record<string, number> = { AUTH_ERROR: 401, RATE_LIMIT: 429, UNKNOWN: 500 };
+      const code = codeMap[error.code] ?? 2001;
+      const status = statusMap[error.code] ?? 500;
+      return NextResponse.json(
+        { code, message: error.message, provider: error.provider, data: null },
+        { status }
+      );
+    }
     return NextResponse.json(
       { code: 2001, message: 'AI provider error', data: null },
       { status: 500 }

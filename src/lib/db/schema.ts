@@ -1,15 +1,15 @@
 import { sqliteTable, text, integer, index } from 'drizzle-orm/sqlite-core';
 
 // =====================
-// Business Tables
+// Business Prefix
 // =====================
-// 注意：表名将自动添加业务前缀（通过数据库配置）
-// 开发环境前缀: nomos_dev_
-// 预发布环境前缀: nomos_stg_
-// 生产环境前缀: nomos_prod_
+// 按环境区分：nomos_dev_ / nomos_stg_ / nomos_prod_
+const ENV = process.env.NOMOS_ENV || 'dev';
+export const BUSINESS_PREFIX: string =
+  process.env.BUSINESS_PREFIX ?? `nomos_${ENV === 'staging' ? 'stg' : ENV === 'production' ? 'prod' : 'dev'}_`;
 
 // Users table
-export const users = sqliteTable('users', {
+export const users = sqliteTable(`${BUSINESS_PREFIX}users`, {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
   email: text('email').unique().notNull(),
@@ -23,7 +23,7 @@ export const users = sqliteTable('users', {
 });
 
 // AI model configurations
-export const aiConfigs = sqliteTable('ai_configs', {
+export const aiConfigs = sqliteTable(`${BUSINESS_PREFIX}ai_configs`, {
   id: text('id').primaryKey(),
   userId: text('user_id').notNull().references(() => users.id),
   provider: text('provider').notNull(),
@@ -37,7 +37,7 @@ export const aiConfigs = sqliteTable('ai_configs', {
 });
 
 // Chat sessions
-export const chatSessions = sqliteTable('chat_sessions', {
+export const chatSessions = sqliteTable(`${BUSINESS_PREFIX}chat_sessions`, {
   id: text('id').primaryKey(),
   userId: text('user_id').notNull().references(() => users.id),
   title: text('title').notNull(),
@@ -47,7 +47,7 @@ export const chatSessions = sqliteTable('chat_sessions', {
 });
 
 // Chat messages
-export const chatMessages = sqliteTable('chat_messages', {
+export const chatMessages = sqliteTable(`${BUSINESS_PREFIX}chat_messages`, {
   id: text('id').primaryKey(),
   sessionId: text('session_id').notNull().references(() => chatSessions.id),
   role: text('role').notNull(),
@@ -59,7 +59,7 @@ export const chatMessages = sqliteTable('chat_messages', {
 }));
 
 // Knowledge files
-export const knowledgeFiles = sqliteTable('knowledge_files', {
+export const knowledgeFiles = sqliteTable(`${BUSINESS_PREFIX}knowledge_files`, {
   id: text('id').primaryKey(),
   userId: text('user_id').notNull().references(() => users.id),
   filename: text('filename').notNull(),
@@ -70,7 +70,7 @@ export const knowledgeFiles = sqliteTable('knowledge_files', {
 });
 
 // AI timeline events
-export const timelineAiEvents = sqliteTable('timeline_ai_events', {
+export const timelineAiEvents = sqliteTable(`${BUSINESS_PREFIX}timeline_ai_events`, {
   id: text('id').primaryKey(),
   userId: text('user_id').notNull().references(() => users.id),
   type: text('type').notNull(),
@@ -82,7 +82,7 @@ export const timelineAiEvents = sqliteTable('timeline_ai_events', {
 }));
 
 // News items
-export const newsItems = sqliteTable('news_items', {
+export const newsItems = sqliteTable(`${BUSINESS_PREFIX}news_items`, {
   id: text('id').primaryKey(),
   userId: text('user_id').notNull().references(() => users.id),
   title: text('title').notNull(),
@@ -98,7 +98,7 @@ export const newsItems = sqliteTable('news_items', {
 }));
 
 // News sources (RSS subscriptions)
-export const newsSources = sqliteTable('news_sources', {
+export const newsSources = sqliteTable(`${BUSINESS_PREFIX}news_sources`, {
   id: text('id').primaryKey(),
   userId: text('user_id').notNull().references(() => users.id),
   name: text('name').notNull(),
@@ -115,14 +115,14 @@ export const newsSources = sqliteTable('news_sources', {
 // Auth Tables (NextAuth v5)
 // =====================
 
-export const sessions = sqliteTable('sessions', {
+export const sessions = sqliteTable(`${BUSINESS_PREFIX}sessions`, {
   id: text('id').primaryKey(),
   userId: text('user_id').notNull().references(() => users.id),
   expires: integer('expires').notNull(),
   sessionToken: text('session_token').unique().notNull(),
 });
 
-export const verificationTokens = sqliteTable('verification_tokens', {
+export const verificationTokens = sqliteTable(`${BUSINESS_PREFIX}verification_tokens`, {
   identifier: text('identifier').notNull(),
   token: text('token').notNull(),
   expires: integer('expires').notNull(),
@@ -132,7 +132,7 @@ export const verificationTokens = sqliteTable('verification_tokens', {
 // Audit Logs
 // =====================
 
-export const auditLogs = sqliteTable('audit_logs', {
+export const auditLogs = sqliteTable(`${BUSINESS_PREFIX}audit_logs`, {
   id: text('id').primaryKey(),
   userId: text('user_id').notNull().references(() => users.id),
   action: text('action').notNull(),

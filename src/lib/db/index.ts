@@ -6,9 +6,10 @@ import path from 'path';
 import fs from 'fs';
 
 // ==================== 业务前缀配置 ====================
-// 从环境变量读取业务前缀
-// 默认值: nomos_
-const BUSINESS_PREFIX = process.env.BUSINESS_PREFIX || 'nomos_';
+// 按环境区分：nomos_dev_ / nomos_stg_ / nomos_prod_
+const ENV = process.env.NOMOS_ENV || 'dev';
+const BUSINESS_PREFIX: string =
+  process.env.BUSINESS_PREFIX ?? `nomos_${ENV === 'staging' ? 'stg' : ENV === 'production' ? 'prod' : 'dev'}_`;
 
 // 定义表名映射
 const TABLES = {

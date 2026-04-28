@@ -10,6 +10,18 @@ export interface AIProviderConfig {
   baseUrl?: string;
 }
 
+// Structured error for AI calls
+export class AIError extends Error {
+  constructor(
+    message: string,
+    public code: string,
+    public provider: string
+  ) {
+    super(message);
+    this.name = 'AIError';
+  }
+}
+
 // Response types
 export interface AIResponse {
   content: string;
@@ -54,24 +66,31 @@ export class AnthropicProvider implements AIProvider {
   }
 
   async chat(messages: Message[], systemPrompt?: string): Promise<AIResponse> {
-    const response = await this.client.messages.create({
-      model: this.extractModelName(),
-      max_tokens: 4096,
-      system: systemPrompt,
-      messages: this.formatMessages(messages),
-    });
+    try {
+      const response = await this.client.messages.create({
+        model: this.extractModelName(),
+        max_tokens: 4096,
+        system: systemPrompt,
+        messages: this.formatMessages(messages),
+      });
 
-    const content = response.content[0];
-    const textContent = content.type === 'text' ? content.text : '';
+      const content = response.content[0];
+      const textContent = content.type === 'text' ? content.text : '';
 
-    return {
-      content: textContent,
-      usage: {
-        inputTokens: response.usage.input_tokens,
-        outputTokens: response.usage.output_tokens,
-      },
-      stopReason: response.stop_reason ?? undefined,
-    };
+      return {
+        content: textContent,
+        usage: {
+          inputTokens: response.usage.input_tokens,
+          outputTokens: response.usage.output_tokens,
+        },
+        stopReason: response.stop_reason ?? undefined,
+      };
+    } catch (err: any) {
+      const status = err?.status ?? err?.response?.status;
+      if (status === 401) throw new AIError('Invalid API key', 'AUTH_ERROR', 'anthropic');
+      if (status === 429) throw new AIError('Rate limit exceeded, please try again later', 'RATE_LIMIT', 'anthropic');
+      throw new AIError(err?.message ?? 'Anthropic API error', status?.toString() ?? 'UNKNOWN', 'anthropic');
+    }
   }
 
   async chatStream(
@@ -148,22 +167,29 @@ export class OpenAIProvider implements AIProvider {
       ? [{ role: 'system', content: systemPrompt }, ...messages]
       : messages;
 
-    const response = await this.client.chat.completions.create({
-      model: this.config.model,
-      messages: allMessages as OpenAI.Chat.ChatCompletionMessageParam[],
-    });
+    try {
+      const response = await this.client.chat.completions.create({
+        model: this.config.model,
+        messages: allMessages as OpenAI.Chat.ChatCompletionMessageParam[],
+      });
 
-    const content = response.choices[0]?.message?.content ?? '';
+      const content = response.choices[0]?.message?.content ?? '';
 
-    return {
-      content,
-      usage: response.usage
-        ? {
-            inputTokens: response.usage.prompt_tokens,
-            outputTokens: response.usage.completion_tokens,
-          }
-        : undefined,
-    };
+      return {
+        content,
+        usage: response.usage
+          ? {
+              inputTokens: response.usage.prompt_tokens,
+              outputTokens: response.usage.completion_tokens,
+            }
+          : undefined,
+      };
+    } catch (err: any) {
+      const status = err?.status ?? err?.response?.status;
+      if (status === 401) throw new AIError('Invalid API key', 'AUTH_ERROR', this.config.provider);
+      if (status === 429) throw new AIError('Rate limit exceeded, please try again later', 'RATE_LIMIT', this.config.provider);
+      throw new AIError(err?.message ?? 'OpenAI-compatible API error', status?.toString() ?? 'UNKNOWN', this.config.provider);
+    }
   }
 
   async chatStream(
@@ -227,7 +253,7 @@ export class OllamaProvider implements AIProvider {
     });
 
     if (!response.ok) {
-      throw new Error(`Ollama API error: ${response.statusText}`);
+      throw new AIError(`Ollama API error: ${response.statusText}`, response.status.toString(), 'ollama');
     }
 
     const data = await response.json();
@@ -256,7 +282,7 @@ export class OllamaProvider implements AIProvider {
     });
 
     if (!response.ok) {
-      throw new Error(`Ollama API error: ${response.statusText}`);
+      throw new AIError(`Ollama API error: ${response.statusText}`, response.status.toString(), 'ollama');
     }
 
     const reader = response.body?.getReader();

@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useSettingsStore } from '@/stores';
+import { VERSION } from '@/constants/version';
 import { Input } from '@/components/ui/input';
 import {
   DropdownMenu,
@@ -49,6 +50,7 @@ export function Header() {
       {/* Logo */}
       <div className="w-48 flex-shrink-0">
         <span className="text-foreground font-bold text-xl tracking-tight">NOMOS</span>
+        <span className="text-muted-foreground text-[10px] ml-1.5 self-center mt-1">v{VERSION}</span>
       </div>
 
       {/* Search */}
