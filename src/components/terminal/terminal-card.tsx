@@ -1,12 +1,14 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useTerminalStore } from '@/stores';
 import { Terminal as XTerm } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import '@xterm/xterm/css/xterm.css';
 
 export function TerminalCard() {
+  const { t } = useTranslation();
   const { close, toggleMaximize, isMaximized, bringToFront, zIndex } = useTerminalStore();
   const [isHovered, setIsHovered] = useState(false);
   const terminalRef = useRef<HTMLDivElement>(null);
@@ -108,7 +110,7 @@ export function TerminalCard() {
     >
       {/* Title Bar */}
       <div className="h-8 bg-muted/80 flex items-center justify-between px-3 cursor-move select-none">
-        <span className="text-sm text-foreground">Terminal</span>
+        <span className="text-sm text-foreground">{t('terminal.title')}</span>
         <div className="flex items-center gap-2">
           {isHovered && (
             <>

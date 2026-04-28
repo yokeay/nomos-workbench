@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslation } from 'react-i18next';
 import { Message } from '@/types/ai';
 import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
@@ -11,6 +12,7 @@ interface MessageBubbleProps {
 }
 
 export function MessageBubble({ message }: MessageBubbleProps) {
+  const { t } = useTranslation();
   const isUser = message.role === 'user';
 
   return (

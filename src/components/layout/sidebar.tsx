@@ -2,27 +2,27 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { useTerminalStore } from '@/stores';
 
-const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: '📊' },
-  { href: '/calendar', label: 'Calendar', icon: '📅' },
-  { href: '/settings', label: 'Settings', icon: '⚙️' },
-];
-
 export function Sidebar() {
+  const { t } = useTranslation();
   const pathname = usePathname();
   const { isOpen, open } = useTerminalStore();
 
+  const navItems = [
+    { href: '/dashboard', label: t('sidebar.dashboard'), icon: '📊' },
+    { href: '/calendar', label: t('sidebar.calendar'), icon: '📅' },
+    { href: '/settings', label: t('sidebar.settings'), icon: '⚙️' },
+  ];
+
   return (
     <aside className="w-16 bg-muted border-r border-border flex flex-col h-full">
-      {/* Logo */}
       <div className="h-14 flex items-center justify-center border-b border-border">
         <span className="text-foreground font-bold text-lg tracking-tight">N</span>
       </div>
 
-      {/* Navigation */}
       <nav className="flex-1 py-4">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
@@ -44,7 +44,6 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* Terminal Button */}
       <div className="py-4 border-t border-border">
         <button
           onClick={() => !isOpen && open()}
@@ -54,7 +53,7 @@ export function Sidebar() {
               ? 'text-foreground'
               : 'text-muted-foreground hover:text-foreground hover:bg-muted'
           )}
-          title="Terminal"
+          title={t('sidebar.terminal')}
         >
           <span className="text-xl">⌨️</span>
         </button>

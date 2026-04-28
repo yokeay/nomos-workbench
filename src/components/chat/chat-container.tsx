@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useChatStore } from '@/stores';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -9,6 +10,7 @@ import { ModelSelector } from './model-selector';
 import { Message } from '@/types/ai';
 
 export function ChatContainer() {
+  const { t } = useTranslation();
   const [input, setInput] = useState('');
   const [selectedModel, setSelectedModel] = useState('claude-3-5-sonnet-20241022');
   const { isStreaming, streamingContent, addMessage, setStreaming, updateStreamingMessage, resetStreaming } = useChatStore();
@@ -33,7 +35,6 @@ export function ChatContainer() {
       createdAt: Date.now(),
     };
 
-    // Add user message to store
     const sessionId = useChatStore.getState().currentSessionId || 'default';
     addMessage(sessionId, userMessage);
 
@@ -42,7 +43,6 @@ export function ChatContainer() {
     updateStreamingMessage('');
 
     try {
-      // Send to API
       const response = await fetch('/api/chat/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -55,7 +55,6 @@ export function ChatContainer() {
 
       if (!response.ok) throw new Error('Failed to send message');
 
-      // Handle streaming response
       const reader = response.body?.getReader();
       if (!reader) throw new Error('No response body');
 
@@ -71,7 +70,6 @@ export function ChatContainer() {
         updateStreamingMessage(fullContent);
       }
 
-      // Add complete assistant message
       const assistantMessage: Message = {
         id: crypto.randomUUID(),
         role: 'assistant',
@@ -89,25 +87,22 @@ export function ChatContainer() {
 
   return (
     <div className="h-full flex flex-col bg-background rounded-lg border border-border overflow-hidden">
-      {/* Header with Model Selector */}
       <div className="h-12 border-b border-border flex items-center justify-between px-4">
-        <span className="text-foreground text-sm font-medium">AI Chat</span>
+        <span className="text-foreground text-sm font-medium">{t('chat.title')}</span>
         <ModelSelector value={selectedModel} onChange={setSelectedModel} />
       </div>
 
-      {/* Messages Area */}
       <div className="flex-1 overflow-y-auto p-4">
         <ChatMessages />
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input Area */}
       <form onSubmit={handleSubmit} className="p-4 border-t border-border">
         <div className="flex gap-2">
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Type your message..."
+            placeholder={t('chat.placeholder')}
             disabled={isStreaming}
             className="flex-1 bg-muted/50 border-border text-foreground placeholder:text-muted-foreground/50"
           />
@@ -115,7 +110,7 @@ export function ChatContainer() {
             type="submit"
             disabled={isStreaming || !input.trim()}
           >
-            {isStreaming ? '...' : 'Send'}
+            {isStreaming ? t('chat.streaming') : t('common.send')}
           </Button>
         </div>
       </form>

@@ -1,5 +1,8 @@
+'use client';
+
 import { create } from 'zustand';
 import { Message, ChatSession } from '@/types/ai';
+import type { Locale } from '@/i18n/config';
 
 interface ChatState {
   // Current session
@@ -107,16 +110,19 @@ export const useTimelineStore = create<TimelineState>((set) => ({
 interface SettingsState {
   theme: 'dark' | 'light';
   sidebarCollapsed: boolean;
+  locale: 'zh' | 'en';
 
   // Actions
   setTheme: (theme: 'dark' | 'light') => void;
   toggleTheme: () => void;
   setSidebarCollapsed: (collapsed: boolean) => void;
+  setLocale: (locale: 'zh' | 'en') => void;
 }
 
 export const useSettingsStore = create<SettingsState>((set) => ({
   theme: 'dark',
   sidebarCollapsed: false,
+  locale: 'zh',
 
   setTheme: (theme) => {
     set({ theme });
@@ -144,4 +150,11 @@ export const useSettingsStore = create<SettingsState>((set) => ({
     }),
 
   setSidebarCollapsed: (collapsed) => set({ sidebarCollapsed: collapsed }),
+
+  setLocale: (locale) => {
+    set({ locale });
+    if (typeof document !== 'undefined') {
+      localStorage.setItem('nomos_locale', locale);
+    }
+  },
 }));
