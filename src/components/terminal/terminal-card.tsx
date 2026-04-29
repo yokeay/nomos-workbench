@@ -18,7 +18,6 @@ export function TerminalCard() {
   useEffect(() => {
     if (!terminalRef.current || xtermRef.current) return;
 
-    // Initialize xterm.js with grayscale theme
     const xterm = new XTerm({
       theme: {
         background: '#1F1D2B',
@@ -56,38 +55,24 @@ export function TerminalCard() {
 
     xtermRef.current = xterm;
 
-    // Handle terminal input
     xterm.onData((data) => {
       if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
         wsRef.current.send(data);
       }
     });
 
-    // Connect to gotty WebSocket (placeholder - would be configured via env)
     const wsUrl = process.env.NEXT_PUBLIC_TERMINAL_WS_URL || 'ws://localhost:8080';
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 
-    ws.onopen = () => {
-      xterm.writeln('\x1b[1;32mConnected to terminal server\x1b[0m\r\n');
-    };
+    const msg = (text: string, color: string) => `\x1b[${color}m${text}\x1b[0m\r\n`;
 
-    ws.onmessage = (event) => {
-      xterm.write(event.data);
-    };
+    ws.onopen = () => xterm.writeln(msg(t('terminal.connected'), '1;32'));
+    ws.onclose = () => xterm.writeln(msg(t('terminal.disconnected'), '1;33'));
+    ws.onerror = () => xterm.writeln(msg(t('terminal.connectError'), '1;31'));
+    ws.onmessage = (event) => xterm.write(event.data);
 
-    ws.onclose = () => {
-      xterm.writeln('\r\n\x1b[1;33mConnection closed\x1b[0m\r\n');
-    };
-
-    ws.onerror = () => {
-      xterm.writeln('\r\n\x1b[1;31mConnection error\x1b[0m\r\n');
-    };
-
-    // Handle resize
-    const handleResize = () => {
-      fitAddon.fit();
-    };
+    const handleResize = () => fitAddon.fit();
     window.addEventListener('resize', handleResize);
 
     return () => {
@@ -108,7 +93,6 @@ export function TerminalCard() {
       onMouseLeave={() => setIsHovered(false)}
       onMouseDown={bringToFront}
     >
-      {/* Title Bar */}
       <div className="h-8 bg-muted/80 flex items-center justify-between px-3 cursor-move select-none">
         <span className="text-sm text-foreground">{t('terminal.title')}</span>
         <div className="flex items-center gap-2">
@@ -117,14 +101,14 @@ export function TerminalCard() {
               <button
                 onClick={toggleMaximize}
                 className="w-5 h-5 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted rounded transition-colors"
-                title="Maximize"
+                title={t('terminal.maximize')}
               >
                 {isMaximized ? '❐' : '⛶'}
               </button>
               <button
                 onClick={close}
                 className="w-5 h-5 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-red-500 rounded transition-colors"
-                title="Close"
+                title={t('terminal.close')}
               >
                 ✕
               </button>
@@ -133,7 +117,6 @@ export function TerminalCard() {
         </div>
       </div>
 
-      {/* Terminal Content */}
       <div ref={terminalRef} className="h-64 p-2" />
     </div>
   );

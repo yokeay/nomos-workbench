@@ -8,17 +8,20 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 export default function CalendarPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [currentDate] = useState(new Date());
   const [events, setEvents] = useState<any[]>([]);
   const [selectedDate, setSelectedDate] = useState<number | null>(null);
 
+  const locale = i18n.language === 'zh' ? 'zh-CN' : 'en-US';
+
   const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
   const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
-  const monthLabel = currentDate.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long' });
+  const monthLabel = currentDate.toLocaleDateString(locale, { year: 'numeric', month: 'long' });
 
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
   const blanks = Array.from({ length: firstDay }, (_, i) => i);
+  const weekdays = t('calendar.weekdays').split(',');
 
   return (
     <div className="h-full p-6 overflow-auto">
@@ -28,7 +31,7 @@ export default function CalendarPage() {
         <Card className="bg-background border-border p-4">
           {/* Day headers */}
           <div className="grid grid-cols-7 gap-1 mb-2">
-            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
+            {weekdays.map(d => (
               <div key={d} className="text-center text-xs text-muted-foreground py-2">{d}</div>
             ))}
           </div>
@@ -52,11 +55,15 @@ export default function CalendarPage() {
         {selectedDate && (
           <div className="mt-6">
             <h2 className="text-lg font-semibold text-foreground mb-3">
-              {currentDate.getFullYear()}/{currentDate.getMonth() + 1}/{selectedDate}
+              {currentDate.toLocaleDateString(locale, {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
             </h2>
             <div className="space-y-2">
               {events.length === 0 && (
-                <p className="text-muted-foreground text-sm">No events</p>
+                <p className="text-muted-foreground text-sm">{t('calendar.noEvents')}</p>
               )}
               {events.map((ev, i) => (
                 <Card key={i} className="bg-background border-border p-3">

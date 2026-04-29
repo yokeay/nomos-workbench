@@ -46,11 +46,11 @@ export default function SettingsPage() {
           <h2 className="text-base font-semibold text-foreground mb-4">{t('settings.profile')}</h2>
           <div className="space-y-3">
             <div>
-              <label className="text-sm text-muted-foreground block mb-1">Name</label>
+              <label className="text-sm text-muted-foreground block mb-1">{t('settings.name')}</label>
               <Input value={name} onChange={e => setName(e.target.value)} className="bg-muted/50 border-border" />
             </div>
             <div>
-              <label className="text-sm text-muted-foreground block mb-1">Email</label>
+              <label className="text-sm text-muted-foreground block mb-1">{t('settings.email')}</label>
               <Input value={email} disabled className="bg-muted/50 border-border opacity-60" />
             </div>
             <Button onClick={handleSave}>{t('common.confirm')}</Button>
@@ -87,7 +87,7 @@ export default function SettingsPage() {
 
         {/* Backup */}
         <Card className="bg-background border-border p-5">
-          <h2 className="text-base font-semibold text-foreground mb-4">Backup</h2>
+          <h2 className="text-base font-semibold text-foreground mb-4">{t('settings.backup')}</h2>
           <BackupManager />
         </Card>
       </div>
@@ -96,12 +96,14 @@ export default function SettingsPage() {
 }
 
 function ApiKeysManager() {
+  const { t } = useTranslation();
   const [keys, setKeys] = useState<any[]>([]);
   const [provider, setProvider] = useState('anthropic');
   const [apiKey, setApiKey] = useState('');
   const [model, setModel] = useState('claude-3-5-sonnet-20241022');
   const [baseUrl, setBaseUrl] = useState('');
   const [saving, setSaving] = useState(false);
+  const toast = useToast();
 
   useEffect(() => {
     fetchKeys();
@@ -125,8 +127,9 @@ function ApiKeysManager() {
         body: JSON.stringify({ provider, apiKey, model, baseUrl }),
       });
       const d = await res.json();
-      if (d.code === 0) { setApiKey(''); fetchKeys(); }
-    } catch {}
+      if (d.code === 0) { setApiKey(''); fetchKeys(); toast.success(t('common.success') as string); }
+      else toast.error(d.message || t('common.error') as string);
+    } catch { toast.error(t('common.error') as string); }
     setSaving(false);
   };
 
@@ -134,34 +137,34 @@ function ApiKeysManager() {
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="text-sm text-muted-foreground block mb-1">Provider</label>
+          <label className="text-sm text-muted-foreground block mb-1">{t('settings.provider')}</label>
           <select value={provider} onChange={e => setProvider(e.target.value)} className="w-full h-8 px-2 rounded-md bg-muted/50 border border-border text-sm text-foreground">
-            <option value="anthropic">Anthropic</option>
-            <option value="openai">OpenAI</option>
-            <option value="ollama">Ollama</option>
+            <option value="anthropic">{t('models.anthropic')}</option>
+            <option value="openai">{t('models.openai')}</option>
+            <option value="ollama">{t('models.ollama')}</option>
           </select>
         </div>
         <div>
-          <label className="text-sm text-muted-foreground block mb-1">Model</label>
+          <label className="text-sm text-muted-foreground block mb-1">{t('settings.model')}</label>
           <Input value={model} onChange={e => setModel(e.target.value)} className="bg-muted/50 border-border" />
         </div>
       </div>
       <div>
-        <label className="text-sm text-muted-foreground block mb-1">API Key</label>
+        <label className="text-sm text-muted-foreground block mb-1">{t('settings.apiKey')}</label>
         <Input type="password" value={apiKey} onChange={e => setApiKey(e.target.value)} className="bg-muted/50 border-border" placeholder="sk-..." />
       </div>
       <div>
-        <label className="text-sm text-muted-foreground block mb-1">Base URL (optional)</label>
+        <label className="text-sm text-muted-foreground block mb-1">{t('settings.baseUrl')}</label>
         <Input value={baseUrl} onChange={e => setBaseUrl(e.target.value)} className="bg-muted/50 border-border" />
       </div>
       <Button onClick={handleSave} disabled={saving || !apiKey.trim()}>
-        {saving ? '...' : 'Save'}
+        {saving ? t('settings.saving') : t('settings.save')}
       </Button>
       <div className="mt-3 space-y-1">
         {keys.map((k: any) => (
           <div key={k.id} className="flex items-center justify-between text-sm text-muted-foreground p-2 rounded bg-muted/30">
-            <span>{k.provider} / {k.model} {k.isActive ? '(active)' : ''}</span>
-            <span>{k.hasKey ? '••••' : 'no key'}</span>
+            <span>{k.provider} / {k.model} {k.isActive ? t('settings.apiKeyActive') : ''}</span>
+            <span>{k.hasKey ? '••••' : t('settings.apiKeyNone')}</span>
           </div>
         ))}
       </div>
@@ -170,8 +173,10 @@ function ApiKeysManager() {
 }
 
 function BackupManager() {
+  const { t } = useTranslation();
   const [backups, setBackups] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const toast = useToast();
 
   const listBackups = async () => {
     try {
@@ -188,13 +193,13 @@ function BackupManager() {
     try {
       const res = await fetch('/api/backup', { method: 'POST' });
       const d = await res.json();
-      if (d.code === 0) listBackups();
-    } catch {}
+      if (d.code === 0) { listBackups(); toast.success(t('common.success') as string); }
+    } catch { toast.error(t('common.error') as string); }
     setLoading(false);
   };
 
   const restore = async (name: string) => {
-    if (!confirm('Restore from ' + name + '? This will overwrite current data.')) return;
+    if (!confirm(t('settings.backupConfirm', { name }))) return;
     try {
       const res = await fetch('/api/backup', {
         method: 'PUT',
@@ -202,21 +207,24 @@ function BackupManager() {
         body: JSON.stringify({ backupName: name }),
       });
       const d = await res.json();
-      if (d.code === 0) alert('Restored. Reloading...');
-    } catch {}
+      if (d.code === 0) {
+        toast.success(t('settings.backupRestored') as string);
+        setTimeout(() => location.reload(), 1500);
+      }
+    } catch { toast.error(t('common.error') as string); }
   };
 
   return (
     <div className="space-y-3">
-      <Button onClick={createBackup} disabled={loading}>{loading ? '...' : 'Create Backup'}</Button>
+      <Button onClick={createBackup} disabled={loading}>{loading ? t('settings.backupCreating') : t('settings.backupCreate')}</Button>
       <div className="space-y-1">
         {backups.map((b: any) => (
           <div key={b.name} className="flex items-center justify-between text-sm text-muted-foreground p-2 rounded bg-muted/30">
             <span>{b.name} ({(b.size / 1024).toFixed(1)} KB)</span>
-            <Button size="xs" variant="ghost" onClick={() => restore(b.name)}>Restore</Button>
+            <Button size="xs" variant="ghost" onClick={() => restore(b.name)}>{t('settings.backupRestore')}</Button>
           </div>
         ))}
-        {backups.length === 0 && <span className="text-xs text-muted-foreground">No backups</span>}
+        {backups.length === 0 && <span className="text-xs text-muted-foreground">{t('settings.backupNone')}</span>}
       </div>
     </div>
   );

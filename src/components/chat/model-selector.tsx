@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslation } from 'react-i18next';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface ModelSelectorProps {
@@ -8,15 +9,17 @@ interface ModelSelectorProps {
 }
 
 const models = [
-  { value: 'claude-3-5-sonnet-20241022', label: 'Claude 3.5 Sonnet', provider: 'Anthropic' },
-  { value: 'gpt-4o', label: 'GPT-4o', provider: 'OpenAI' },
-  { value: 'gpt-4-turbo', label: 'GPT-4 Turbo', provider: 'OpenAI' },
-  { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo', provider: 'OpenAI' },
-  { value: 'llama3', label: 'Llama 3', provider: 'Ollama' },
-  { value: 'qwen2', label: 'Qwen 2', provider: 'Ollama' },
+  { value: 'claude-3-5-sonnet-20241022', labelKey: 'models.claude35sonnet', providerKey: 'models.anthropic' },
+  { value: 'gpt-4o', labelKey: 'models.gpt4o', providerKey: 'models.openai' },
+  { value: 'gpt-4-turbo', labelKey: 'models.gpt4turbo', providerKey: 'models.openai' },
+  { value: 'gpt-3.5-turbo', labelKey: 'models.gpt35turbo', providerKey: 'models.openai' },
+  { value: 'llama3', labelKey: 'models.llama3', providerKey: 'models.ollama' },
+  { value: 'qwen2', labelKey: 'models.qwen2', providerKey: 'models.ollama' },
 ];
 
 export function ModelSelector({ value, onChange }: ModelSelectorProps) {
+  const { t } = useTranslation();
+
   return (
     <Select value={value} onValueChange={(v) => v && onChange(v)}>
       <SelectTrigger className="w-48 h-8 bg-muted/50 border-border text-foreground text-xs">
@@ -30,8 +33,8 @@ export function ModelSelector({ value, onChange }: ModelSelectorProps) {
             className="text-foreground hover:bg-muted text-xs"
           >
             <div className="flex items-center justify-between w-full">
-              <span>{model.label}</span>
-              <span className="text-muted-foreground ml-2">{model.provider}</span>
+              <span>{t(model.labelKey)}</span>
+              <span className="text-muted-foreground ml-2">{t(model.providerKey)}</span>
             </div>
           </SelectItem>
         ))}

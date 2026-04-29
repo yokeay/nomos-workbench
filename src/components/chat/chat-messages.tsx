@@ -1,10 +1,12 @@
 'use client';
 
+import { useTranslation } from 'react-i18next';
 import { useChatStore } from '@/stores';
 import { MessageBubble } from './message-bubble';
 import { cn } from '@/lib/utils';
 
 export function ChatMessages() {
+  const { t } = useTranslation();
   const { messages, currentSessionId, isStreaming, streamingContent } = useChatStore();
   const sessionMessages = messages.get(currentSessionId || 'default') || [];
 
@@ -14,11 +16,10 @@ export function ChatMessages() {
         <MessageBubble key={message.id} message={message} />
       ))}
 
-      {/* Streaming message indicator */}
       {isStreaming && streamingContent && (
         <div className="flex items-start gap-3">
           <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground text-sm font-medium">
-            AI
+            {t('chat.aiLabel')}
           </div>
           <div className="flex-1 bg-muted/50 rounded-lg p-3">
             <div className={cn(
