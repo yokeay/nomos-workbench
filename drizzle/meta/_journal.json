@@ -15,6 +15,13 @@
       "when": 1777372797329,
       "tag": "0001_dashing_green_goblin",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1777422085914,
+      "tag": "0002_brainy_mercury",
+      "breakpoints": true
     }
   ]
 }

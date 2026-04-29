@@ -22,6 +22,20 @@ CREATE TABLE `nomos_dev_audit_logs` (
 	FOREIGN KEY (`user_id`) REFERENCES `nomos_dev_users`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
+CREATE TABLE `nomos_dev_calendar_events` (
+	`id` text PRIMARY KEY NOT NULL,
+	`user_id` text NOT NULL,
+	`title` text NOT NULL,
+	`description` text,
+	`start_time` integer NOT NULL,
+	`end_time` integer NOT NULL,
+	`color` text DEFAULT '#3B82F6',
+	`created_at` integer NOT NULL,
+	`updated_at` integer NOT NULL,
+	FOREIGN KEY (`user_id`) REFERENCES `nomos_dev_users`(`id`) ON UPDATE no action ON DELETE no action
+);
+--> statement-breakpoint
+CREATE INDEX `calendar_events_user_idx` ON `nomos_dev_calendar_events` (`user_id`,`start_time`);--> statement-breakpoint
 CREATE TABLE `nomos_dev_chat_messages` (
 	`id` text PRIMARY KEY NOT NULL,
 	`session_id` text NOT NULL,

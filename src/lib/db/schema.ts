@@ -128,6 +128,21 @@ export const verificationTokens = sqliteTable(`${BUSINESS_PREFIX}verification_to
   expires: integer('expires').notNull(),
 });
 
+// Calendar events
+export const calendarEvents = sqliteTable(`${BUSINESS_PREFIX}calendar_events`, {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull().references(() => users.id),
+  title: text('title').notNull(),
+  description: text('description'),
+  startTime: integer('start_time').notNull(),
+  endTime: integer('end_time').notNull(),
+  color: text('color').default('#3B82F6'),
+  createdAt: integer('created_at').notNull(),
+  updatedAt: integer('updated_at').notNull(),
+}, (table) => ({
+  userIdx: index('calendar_events_user_idx').on(table.userId, table.startTime),
+}));
+
 // =====================
 // Audit Logs
 // =====================
@@ -168,6 +183,9 @@ export type NewNewsItem = typeof newsItems.$inferInsert;
 
 export type NewsSource = typeof newsSources.$inferSelect;
 export type NewNewsSource = typeof newsSources.$inferInsert;
+
+export type CalendarEvent = typeof calendarEvents.$inferSelect;
+export type NewCalendarEvent = typeof calendarEvents.$inferInsert;
 
 export type AuditLog = typeof auditLogs.$inferSelect;
 export type NewAuditLog = typeof auditLogs.$inferInsert;
