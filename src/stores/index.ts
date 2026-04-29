@@ -3,18 +3,16 @@
 import { create } from 'zustand';
 import { Message, ChatSession } from '@/types/ai';
 import type { Locale } from '@/i18n/config';
+import i18n from '@/lib/i18n';
 
 interface ChatState {
-  // Current session
   currentSessionId: string | null;
   sessions: ChatSession[];
   messages: Map<string, Message[]>;
 
-  // Streaming state
   isStreaming: boolean;
   streamingContent: string;
 
-  // Actions
   setCurrentSession: (sessionId: string | null) => void;
   addMessage: (sessionId: string, message: Message) => void;
   updateStreamingMessage: (content: string) => void;
@@ -39,19 +37,14 @@ export const useChatStore = create<ChatState>((set, get) => ({
     updatedMessages.set(sessionId, [...currentMessages, message]);
     set({ messages: updatedMessages });
   },
-
   updateStreamingMessage: (content) => set({ streamingContent: content }),
-
   clearMessages: (sessionId) => {
     const updatedMessages = new Map(get().messages);
     updatedMessages.delete(sessionId);
     set({ messages: updatedMessages });
   },
-
   setSessions: (sessions) => set({ sessions }),
-
   setStreaming: (isStreaming) => set({ isStreaming }),
-
   resetStreaming: () => set({ isStreaming: false, streamingContent: '' }),
 }));
 
@@ -61,7 +54,6 @@ interface TerminalState {
   position: 'top' | 'bottom' | 'float';
   zIndex: number;
 
-  // Actions
   open: () => void;
   close: () => void;
   toggleMaximize: () => void;
@@ -88,7 +80,6 @@ interface TimelineState {
   newsScrollPosition: number;
   scrollLocked: boolean;
 
-  // Actions
   setActiveChannel: (channel: 'ai' | 'news') => void;
   setAiScrollPosition: (position: number) => void;
   setNewsScrollPosition: (position: number) => void;
@@ -112,21 +103,27 @@ interface SettingsState {
   sidebarCollapsed: boolean;
   locale: 'zh' | 'en';
 
-  // Actions
   setTheme: (theme: 'dark' | 'light') => void;
   toggleTheme: () => void;
   setSidebarCollapsed: (collapsed: boolean) => void;
   setLocale: (locale: 'zh' | 'en') => void;
 }
 
+const getInitialLocale = (): 'zh' | 'en' => {
+  if (typeof document !== 'undefined') {
+    const stored = localStorage.getItem('nomos_locale');
+    if (stored === 'zh' || stored === 'en') return stored;
+  }
+  return 'zh';
+};
+
 export const useSettingsStore = create<SettingsState>((set) => ({
   theme: 'dark',
   sidebarCollapsed: false,
-  locale: 'zh',
+  locale: getInitialLocale(),
 
   setTheme: (theme) => {
     set({ theme });
-    // Update HTML class for Tailwind dark mode
     if (typeof document !== 'undefined') {
       if (theme === 'dark') {
         document.documentElement.classList.add('dark');
@@ -156,5 +153,6 @@ export const useSettingsStore = create<SettingsState>((set) => ({
     if (typeof document !== 'undefined') {
       localStorage.setItem('nomos_locale', locale);
     }
+    i18n.changeLanguage(locale);
   },
 }));
