@@ -6,6 +6,7 @@ import { useTerminalStore } from '@/stores';
 import { Terminal as XTerm } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import '@xterm/xterm/css/xterm.css';
+import { Minus, X, Maximize2, Minimize2, Terminal } from 'lucide-react';
 
 export function TerminalCard() {
   const { t } = useTranslation();
@@ -20,32 +21,33 @@ export function TerminalCard() {
 
     const xterm = new XTerm({
       theme: {
-        background: '#1F1D2B',
-        foreground: '#FFFFFF',
-        cursor: '#FFFFFF',
-        cursorAccent: '#1F1D2B',
-        selectionBackground: '#1F1D2B',
-        black: '#1F1D2B',
-        red: '#EF4444',
-        green: '#22C55E',
-        yellow: '#EAB308',
-        blue: '#3B82F6',
-        magenta: '#A855F7',
-        cyan: '#06B6D4',
-        white: '#FFFFFF',
-        brightBlack: '#4B5563',
-        brightRed: '#F87171',
-        brightGreen: '#4ADE80',
-        brightYellow: '#FACC15',
-        brightBlue: '#60A5FA',
-        brightMagenta: '#C084FC',
-        brightCyan: '#22D3EE',
-        brightWhite: '#FFFFFF',
+        background: '#0F0F13',
+        foreground: '#E4E4E9',
+        cursor: '#E4E4E9',
+        cursorAccent: '#0F0F13',
+        selectionBackground: '#2D2D3A',
+        black: '#1A1A26',
+        red: '#F25C5C',
+        green: '#5CBF7B',
+        yellow: '#E5C94D',
+        blue: '#5C8BF2',
+        magenta: '#B07FF2',
+        cyan: '#4DD4D4',
+        white: '#E4E4E9',
+        brightBlack: '#4D4D5E',
+        brightRed: '#F78C8C',
+        brightGreen: '#7DD694',
+        brightYellow: '#EDD971',
+        brightBlue: '#8CB0F7',
+        brightMagenta: '#C9A6F7',
+        brightCyan: '#73DFDF',
+        brightWhite: '#F5F5FA',
       },
       fontFamily: '"JetBrains Mono", "Fira Code", monospace',
       fontSize: 13,
       cursorBlink: true,
       cursorStyle: 'bar',
+      allowTransparency: true,
     });
 
     const fitAddon = new FitAddon();
@@ -85,7 +87,7 @@ export function TerminalCard() {
 
   return (
     <div
-      className={`relative bg-muted rounded-lg border border-border shadow-lg overflow-hidden transition-all ${
+      className={`relative bg-[#0F0F13] rounded-2xl border border-border/40 shadow-xl-soft overflow-hidden transition-all duration-normal animate-slide-up ${
         isMaximized ? 'fixed inset-4 z-50' : ''
       }`}
       style={{ zIndex }}
@@ -93,30 +95,41 @@ export function TerminalCard() {
       onMouseLeave={() => setIsHovered(false)}
       onMouseDown={bringToFront}
     >
-      <div className="h-8 bg-muted/80 flex items-center justify-between px-3 cursor-move select-none">
-        <span className="text-sm text-foreground">{t('terminal.title')}</span>
+      {/* Title bar — macOS window chrome style */}
+      <div className="h-9 bg-[#1A1A26] flex items-center justify-between px-3 cursor-move select-none border-b border-white/[0.04]">
         <div className="flex items-center gap-2">
-          {isHovered && (
-            <>
-              <button
-                onClick={toggleMaximize}
-                className="w-5 h-5 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted rounded transition-colors"
-                title={t('terminal.maximize')}
-              >
-                {isMaximized ? '❐' : '⛶'}
-              </button>
-              <button
-                onClick={close}
-                className="w-5 h-5 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-red-500 rounded transition-colors"
-                title={t('terminal.close')}
-              >
-                ✕
-              </button>
-            </>
-          )}
+          {/* Traffic light dots */}
+          <div className="flex items-center gap-1.5 mr-2">
+            <button
+              onClick={close}
+              className="w-3 h-3 rounded-full bg-[#F25C5C] hover:bg-[#F78C8C] transition-colors flex items-center justify-center"
+              title={t('terminal.close')}
+            >
+              {isHovered && <X className="w-2 h-2 text-[#4D0000]" />}
+            </button>
+            <button
+              onClick={toggleMaximize}
+              className="w-3 h-3 rounded-full bg-[#E5C94D] hover:bg-[#EDD971] transition-colors flex items-center justify-center"
+              title={t('terminal.maximize')}
+            >
+              {isHovered && (
+                isMaximized
+                  ? <Minimize2 className="w-2 h-2 text-[#4D3A00]" />
+                  : <Maximize2 className="w-2 h-2 text-[#4D3A00]" />
+              )}
+            </button>
+            <div className="w-3 h-3 rounded-full bg-[#5CBF7B] hover:bg-[#7DD694] transition-colors flex items-center justify-center">
+              {isHovered && <Minus className="w-2 h-2 text-[#003A15]" />}
+            </div>
+          </div>
+          <Terminal className="w-3.5 h-3.5 text-white/40" />
+          <span className="text-xs text-white/50 font-medium tracking-wide">
+            {t('terminal.title')}
+          </span>
         </div>
       </div>
 
+      {/* Terminal body */}
       <div ref={terminalRef} className="h-64 p-2" />
     </div>
   );

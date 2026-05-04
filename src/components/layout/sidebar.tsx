@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { useTerminalStore } from '@/stores';
+import { LayoutDashboard, Calendar, Settings, Terminal } from 'lucide-react';
 
 export function Sidebar() {
   const { t } = useTranslation();
@@ -12,50 +13,56 @@ export function Sidebar() {
   const { isOpen, open } = useTerminalStore();
 
   const navItems = [
-    { href: '/dashboard', label: t('sidebar.dashboard'), icon: '📊' },
-    { href: '/calendar', label: t('sidebar.calendar'), icon: '📅' },
-    { href: '/settings', label: t('sidebar.settings'), icon: '⚙️' },
+    { href: '/dashboard', label: t('sidebar.dashboard'), icon: LayoutDashboard },
+    { href: '/calendar', label: t('sidebar.calendar'), icon: Calendar },
+    { href: '/settings', label: t('sidebar.settings'), icon: Settings },
   ];
 
   return (
-    <aside className="w-16 bg-muted border-r border-border flex flex-col h-full">
-      <div className="h-14 flex items-center justify-center border-b border-border">
-        <span className="text-foreground font-bold text-lg tracking-tight">N</span>
+    <aside className="w-16 bg-sidebar border-r border-sidebar-border flex flex-col h-full shrink-0 z-20">
+      {/* Logo */}
+      <div className="h-14 flex items-center justify-center border-b border-sidebar-border">
+        <span className="text-foreground font-bold text-lg tracking-tight select-none">
+          N
+        </span>
       </div>
 
-      <nav className="flex-1 py-4">
+      {/* Navigation */}
+      <nav className="flex-1 py-3 space-y-1 px-2">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
+          const Icon = item.icon;
           return (
             <Link
               key={item.href}
               href={item.href}
+              title={item.label}
               className={cn(
-                'relative flex items-center justify-center h-12 text-muted-foreground hover:text-foreground transition-colors',
-                isActive && 'text-foreground'
+                'relative flex items-center justify-center h-11 rounded-xl transition-all duration-normal',
+                isActive
+                  ? 'bg-sidebar-active text-sidebar-foreground shadow-subtle'
+                  : 'text-muted-foreground/60 hover:text-sidebar-foreground/80 hover:bg-sidebar-hover'
               )}
             >
-              {isActive && (
-                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-foreground rounded-r" />
-              )}
-              <span className="text-xl">{item.icon}</span>
+              <Icon className="w-5 h-5" />
             </Link>
           );
         })}
       </nav>
 
-      <div className="py-4 border-t border-border">
+      {/* Terminal Toggle */}
+      <div className="py-3 px-2 border-t border-sidebar-border">
         <button
           onClick={() => !isOpen && open()}
-          className={cn(
-            'w-full h-12 flex items-center justify-center transition-colors',
-            isOpen
-              ? 'text-foreground'
-              : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-          )}
           title={t('sidebar.terminal')}
+          className={cn(
+            'w-full h-11 flex items-center justify-center rounded-xl transition-all duration-normal',
+            isOpen
+              ? 'bg-sidebar-active text-sidebar-foreground shadow-subtle'
+              : 'text-muted-foreground/60 hover:text-sidebar-foreground/80 hover:bg-sidebar-hover'
+          )}
         >
-          <span className="text-xl">⌨️</span>
+          <Terminal className="w-5 h-5" />
         </button>
       </div>
     </aside>

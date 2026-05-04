@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
+import { User, Sparkles } from 'lucide-react';
 
 interface MessageBubbleProps {
   message: Message;
@@ -20,26 +21,28 @@ export function MessageBubble({ message }: MessageBubbleProps) {
       {/* Avatar */}
       <div
         className={cn(
-          'w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium flex-shrink-0',
-          isUser ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+          'w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ring-1 ring-border/30 shadow-subtle',
+          isUser
+            ? 'bg-foreground text-background'
+            : 'bg-accent/60 text-foreground/50'
         )}
       >
-        {isUser ? 'U' : 'AI'}
+        {isUser ? <User className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
       </div>
 
-      {/* Content */}
+      {/* Bubble */}
       <div
         className={cn(
-          'flex-1 max-w-[80%] rounded-lg p-3',
+          'flex-1 max-w-[78%] px-4 py-3',
           isUser
-            ? 'bg-primary text-primary-foreground'
-            : 'bg-muted/50 text-foreground markdown-content'
+            ? 'bg-foreground text-background rounded-2xl rounded-tr-md'
+            : 'bg-muted/40 text-foreground/85 rounded-2xl rounded-tl-md border border-border/30'
         )}
       >
         {isUser ? (
           <p className="text-sm leading-relaxed">{message.content}</p>
         ) : (
-          <div className="text-sm leading-relaxed">
+          <div className="text-sm leading-relaxed [&_pre]:bg-black/10 [&_pre]:p-3 [&_pre]:rounded-xl [&_pre]:overflow-x-auto [&_code]:text-sm [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded-md [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_h1]:text-lg [&_h1]:font-bold [&_h2]:text-base [&_h2]:font-semibold [&_blockquote]:border-l-2 [&_blockquote]:border-border [&_blockquote]:pl-3 [&_blockquote]:text-muted-foreground">
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               rehypePlugins={[rehypeHighlight]}

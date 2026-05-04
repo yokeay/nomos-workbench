@@ -1,7 +1,14 @@
 'use client';
 
 import { useTranslation } from 'react-i18next';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { ChevronDown } from 'lucide-react';
 
 interface ModelSelectorProps {
   value: string;
@@ -22,19 +29,21 @@ export function ModelSelector({ value, onChange }: ModelSelectorProps) {
 
   return (
     <Select value={value} onValueChange={(v) => v && onChange(v)}>
-      <SelectTrigger className="w-48 h-8 bg-muted/50 border-border text-foreground text-xs">
+      <SelectTrigger className="w-44 h-8 bg-accent/50 border-transparent text-foreground/70 text-xs font-medium rounded-lg hover:bg-accent/80 hover:text-foreground transition-all duration-fast">
         <SelectValue />
       </SelectTrigger>
-      <SelectContent className="bg-background border-border">
+      <SelectContent className="glass border-border/60 shadow-lg-soft rounded-xl p-1 animate-scale-in">
         {models.map((model) => (
           <SelectItem
             key={model.value}
             value={model.value}
-            className="text-foreground hover:bg-muted text-xs"
+            className="text-foreground hover:bg-accent/60 text-xs rounded-lg cursor-pointer transition-colors duration-fast"
           >
-            <div className="flex items-center justify-between w-full">
-              <span>{t(model.labelKey)}</span>
-              <span className="text-muted-foreground ml-2">{t(model.providerKey)}</span>
+            <div className="flex items-center justify-between w-full gap-3">
+              <span className="font-medium">{t(model.labelKey)}</span>
+              <span className="text-muted-foreground/60 text-[10px] tracking-wide">
+                {t(model.providerKey)}
+              </span>
             </div>
           </SelectItem>
         ))}

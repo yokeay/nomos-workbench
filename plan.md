@@ -19,6 +19,13 @@
 
 ## 待办任务
 
+### v0.1.1 - macOS UI Redesign
+- [x] macOS极简风格UI重设计 ✅ 2026-05-04
+- [x] Glass morphism 毛玻璃效果（Header/Sidebar/Dropdown/Sheet） ✅ 2026-05-04
+- [x] 全局CSS变量重构（HSL灰阶/多层阴影/Spring缓动） ✅ 2026-05-04
+- [x] lucide-react 图标替换 ✅ 2026-05-04
+- [x] 16个shadcn/ui基元组件重写 ✅ 2026-05-04
+
 ### 当前迭代 (v1.0.0)
 - [ ] 添加 i18n 国际化支持
 - [ ] 完善错误处理和统一通知
