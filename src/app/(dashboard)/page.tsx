@@ -8,10 +8,10 @@ export default function DashboardPage() {
   const { isOpen: terminalOpen } = useTerminalStore();
 
   return (
-    <div className="h-full flex flex-col p-5 overflow-hidden">
-      {/* Floating Terminal Card */}
+    <div className="h-full flex flex-col overflow-hidden">
+      {/* Terminal Card */}
       {terminalOpen && (
-        <div className="mb-4 flex-shrink-0">
+        <div className="flex-shrink-0">
           <TerminalCard />
         </div>
       )}

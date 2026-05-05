@@ -87,8 +87,8 @@ export function TerminalCard() {
 
   return (
     <div
-      className={`relative bg-[#0F0F13] rounded-2xl border border-border/40 shadow-xl-soft overflow-hidden transition-all duration-normal animate-slide-up ${
-        isMaximized ? 'fixed inset-4 z-50' : ''
+      className={`relative bg-[#0F0F13] overflow-hidden transition-all duration-normal animate-slide-up ${
+        isMaximized ? 'fixed inset-4 z-50 rounded-2xl border border-border/40 shadow-xl-soft' : ''
       }`}
       style={{ zIndex }}
       onMouseEnter={() => setIsHovered(true)}
