@@ -17,6 +17,8 @@ void i18n.use(initReactI18next).init({
   lng: getInitialLocale(),
   fallbackLng: DEFAULT_LOCALE,
   supportedLngs: Object.keys(LOCALES) as ['zh', 'en'],
+  ns: ['common', 'chat', 'sidebar', 'header', 'timeline', 'terminal', 'calendar', 'settings', 'models'],
+  defaultNS: 'common',
   interpolation: {
     escapeValue: false,
   },

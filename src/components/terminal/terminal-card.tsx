@@ -69,9 +69,9 @@ export function TerminalCard() {
 
     const msg = (text: string, color: string) => `\x1b[${color}m${text}\x1b[0m\r\n`;
 
-    ws.onopen = () => xterm.writeln(msg(t('terminal.connected'), '1;32'));
-    ws.onclose = () => xterm.writeln(msg(t('terminal.disconnected'), '1;33'));
-    ws.onerror = () => xterm.writeln(msg(t('terminal.connectError'), '1;31'));
+    ws.onopen = () => xterm.writeln(msg(t('terminal:connected'), '1;32'));
+    ws.onclose = () => xterm.writeln(msg(t('terminal:disconnected'), '1;33'));
+    ws.onerror = () => xterm.writeln(msg(t('terminal:connectError'), '1;31'));
     ws.onmessage = (event) => xterm.write(event.data);
 
     const handleResize = () => fitAddon.fit();
@@ -103,14 +103,14 @@ export function TerminalCard() {
             <button
               onClick={close}
               className="w-3 h-3 rounded-full bg-[#F25C5C] hover:bg-[#F78C8C] transition-colors flex items-center justify-center"
-              title={t('terminal.close')}
+              title={t('terminal:close')}
             >
               {isHovered && <X className="w-2 h-2 text-[#4D0000]" />}
             </button>
             <button
               onClick={toggleMaximize}
               className="w-3 h-3 rounded-full bg-[#E5C94D] hover:bg-[#EDD971] transition-colors flex items-center justify-center"
-              title={t('terminal.maximize')}
+              title={t('terminal:maximize')}
             >
               {isHovered && (
                 isMaximized
@@ -124,7 +124,7 @@ export function TerminalCard() {
           </div>
           <Terminal className="w-3.5 h-3.5 text-white/40" />
           <span className="text-xs text-white/50 font-medium tracking-wide">
-            {t('terminal.title')}
+            {t('terminal:title')}
           </span>
         </div>
       </div>

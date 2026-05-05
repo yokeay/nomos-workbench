@@ -52,7 +52,7 @@ export function Header() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40 transition-colors group-hover:text-muted-foreground/60" />
           <Input
             type="search"
-            placeholder={t('header.search')}
+            placeholder={t('header:search')}
             className="w-full h-9 pl-10 pr-10 bg-muted/60 border-transparent text-sm text-foreground placeholder:text-muted-foreground/40 rounded-lg transition-all duration-normal focus:bg-input-background focus:border-border focus:ring-1 focus:ring-ring/20"
             onFocus={() => setSearchFocused(true)}
             onBlur={() => setSearchFocused(false)}
@@ -85,7 +85,7 @@ export function Header() {
           >
             <DropdownMenuItem className="gap-3 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-accent/60 cursor-pointer transition-colors duration-fast">
               <User className="w-4 h-4" />
-              {t('common.profile')}
+              {t('common:profile')}
             </DropdownMenuItem>
             <DropdownMenuItem
               className="gap-3 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-accent/60 cursor-pointer transition-colors duration-fast"
@@ -96,7 +96,7 @@ export function Header() {
               ) : (
                 <Moon className="w-4 h-4" />
               )}
-              {theme === 'dark' ? t('header.lightMode') : t('header.darkMode')}
+              {theme === 'dark' ? t('header:lightMode') : t('header:darkMode')}
             </DropdownMenuItem>
             <DropdownMenuSeparator className="bg-border/50 my-1" />
             <DropdownMenuItem
@@ -104,12 +104,12 @@ export function Header() {
               onClick={() => setLocale(locale === 'zh' ? 'en' : 'zh')}
             >
               <Languages className="w-4 h-4" />
-              {locale === 'zh' ? t('header.english') : t('header.chinese')}
+              {locale === 'zh' ? t('header:english') : t('header:chinese')}
             </DropdownMenuItem>
             <DropdownMenuSeparator className="bg-border/50 my-1" />
             <DropdownMenuItem className="gap-3 rounded-lg text-sm text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer transition-colors duration-fast">
               <LogOut className="w-4 h-4" />
-              {t('common.logout')}
+              {t('common:logout')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

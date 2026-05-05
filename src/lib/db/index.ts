@@ -1,18 +1,14 @@
-import Database from 'better-sqlite3';
-import { drizzle } from 'drizzle-orm/better-sqlite3';
 import * as schema from './schema';
 import type { InferInsertModel } from 'drizzle-orm';
-import path from 'path';
-import fs from 'fs';
+
 
 // ==================== 业务前缀配置 ====================
-// 按环境区分：nomos_dev_ / nomos_stg_ / nomos_prod_
 const ENV = process.env.NOMOS_ENV || 'dev';
-const BUSINESS_PREFIX: string =
+export const BUSINESS_PREFIX: string =
   process.env.BUSINESS_PREFIX ?? `nomos_${ENV === 'staging' ? 'stg' : ENV === 'production' ? 'prod' : 'dev'}_`;
 
 // 定义表名映射
-const TABLES = {
+export const TABLES = {
   users: `${BUSINESS_PREFIX}users`,
   aiConfigs: `${BUSINESS_PREFIX}ai_configs`,
   chatSessions: `${BUSINESS_PREFIX}chat_sessions`,
@@ -26,27 +22,38 @@ const TABLES = {
   auditLogs: `${BUSINESS_PREFIX}audit_logs`,
 } as const;
 
-// ==================== 数据库路径 ====================
-const dbPath = process.env.DATABASE_URL || path.join(process.cwd(), 'data', 'workbench.db');
+// ==================== Lazy DB connection ====================
+// Uses eval('require') to bypass webpack static analysis of better-sqlite3
+// native addon, which crashes the dev server during compilation.
 
-// 确保数据目录存在
-const dataDir = path.dirname(dbPath);
-if (!fs.existsSync(dataDir)) {
-  fs.mkdirSync(dataDir, { recursive: true });
+const dynamicRequire = eval('require') as NodeRequire;
+
+let _db: ReturnType<typeof import('drizzle-orm/better-sqlite3').drizzle> | null = null;
+
+function getDbPath(): string {
+  const dbPath = process.env.DATABASE_URL || dynamicRequire('path').join(process.cwd(), 'data', 'workbench.db');
+  const dataDir = dynamicRequire('path').dirname(dbPath);
+  if (!dynamicRequire('fs').existsSync(dataDir)) {
+    dynamicRequire('fs').mkdirSync(dataDir, { recursive: true });
+  }
+  return dbPath;
 }
 
-// ==================== 数据库连接 ====================
-const sqlite = new Database(dbPath);
+function initDb() {
+  const Database = dynamicRequire('better-sqlite3');
+  const { drizzle } = dynamicRequire('drizzle-orm/better-sqlite3');
+  const sqlite = new Database(getDbPath());
+  sqlite.pragma('journal_mode = WAL');
+  _db = drizzle(sqlite, { schema }) as any;
+}
 
-// 启用 WAL 模式
-sqlite.pragma('journal_mode = WAL');
-
-// ==================== Drizzle 实例 ====================
-// 使用 sqliteTable 中的表名（需要单独处理）
-export const db = drizzle(sqlite, { schema });
-
-// 导出配置常量
-export { BUSINESS_PREFIX, TABLES };
+// Proxy that lazily initializes the db on first access
+export const db = new Proxy({} as NonNullable<typeof _db>, {
+  get(_target, prop, receiver) {
+    if (!_db) initDb();
+    return Reflect.get(_db as object, prop, receiver);
+  },
+});
 
 // 导出类型
 export type { InferInsertModel };

@@ -13,9 +13,9 @@ export function Sidebar() {
   const { isOpen, open } = useTerminalStore();
 
   const navItems = [
-    { href: '/dashboard', label: t('sidebar.dashboard'), icon: LayoutDashboard },
-    { href: '/calendar', label: t('sidebar.calendar'), icon: Calendar },
-    { href: '/settings', label: t('sidebar.settings'), icon: Settings },
+    { href: '/dashboard', label: t('sidebar:dashboard'), icon: LayoutDashboard },
+    { href: '/calendar', label: t('sidebar:calendar'), icon: Calendar },
+    { href: '/settings', label: t('sidebar:settings'), icon: Settings },
   ];
 
   return (
@@ -54,7 +54,7 @@ export function Sidebar() {
       <div className="py-3 px-2 border-t border-sidebar-border">
         <button
           onClick={() => !isOpen && open()}
-          title={t('sidebar.terminal')}
+          title={t('sidebar:terminal')}
           className={cn(
             'w-full h-11 flex items-center justify-center rounded-xl transition-all duration-normal',
             isOpen

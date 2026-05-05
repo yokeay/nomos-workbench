@@ -95,7 +95,7 @@ export function ChatContainer() {
             <Sparkles className="w-4 h-4 text-foreground/70" />
           </div>
           <span className="text-foreground text-sm font-semibold tracking-tight">
-            {t('chat.title')}
+            {t('chat:title')}
           </span>
         </div>
         <ModelSelector value={selectedModel} onChange={setSelectedModel} />
@@ -113,7 +113,7 @@ export function ChatContainer() {
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={t('chat.placeholder')}
+            placeholder={t('chat:placeholder')}
             disabled={isStreaming}
             className="flex-1 h-12 px-4 bg-muted/60 border-transparent rounded-xl text-sm text-foreground placeholder:text-muted-foreground/40 focus:bg-input-background focus:border-border focus:ring-1 focus:ring-ring/20 transition-all duration-normal"
           />

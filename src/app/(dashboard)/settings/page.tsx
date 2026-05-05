@@ -36,10 +36,10 @@ export default function SettingsPage() {
         body: JSON.stringify({ name }),
       });
       const d = await res.json();
-      if (d.code === 0) toast.success(t('common.success') as string);
-      else toast.error(d.message || t('common.error') as string);
+      if (d.code === 0) toast.success(t('common:success') as string);
+      else toast.error(d.message || t('common:error') as string);
     } catch {
-      toast.error(t('common.error') as string);
+      toast.error(t('common:error') as string);
     }
   };
 
@@ -51,7 +51,7 @@ export default function SettingsPage() {
           <div className="w-10 h-10 rounded-2xl bg-accent/60 flex items-center justify-center">
             <User className="w-5 h-5 text-foreground/60" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">{t('settings.title')}</h1>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">{t('settings:title')}</h1>
         </div>
 
         {/* Profile */}
@@ -59,7 +59,7 @@ export default function SettingsPage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-semibold flex items-center gap-2">
               <User className="w-4 h-4 text-foreground/50" />
-              {t('settings.profile')}
+              {t('settings:profile')}
             </CardTitle>
             <CardDescription className="text-xs text-muted-foreground/70">
               Manage your personal information
@@ -67,7 +67,7 @@ export default function SettingsPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <label className="text-xs font-medium text-muted-foreground block mb-1.5">{t('settings.name')}</label>
+              <label className="text-xs font-medium text-muted-foreground block mb-1.5">{t('settings:name')}</label>
               <Input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -75,7 +75,7 @@ export default function SettingsPage() {
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-muted-foreground block mb-1.5">{t('settings.email')}</label>
+              <label className="text-xs font-medium text-muted-foreground block mb-1.5">{t('settings:email')}</label>
               <Input
                 value={email}
                 disabled
@@ -87,7 +87,7 @@ export default function SettingsPage() {
               className="rounded-xl h-10 px-5 gap-2"
             >
               <Save className="w-4 h-4" />
-              {t('common.confirm')}
+              {t('common:confirm')}
             </Button>
           </CardContent>
         </Card>
@@ -97,7 +97,7 @@ export default function SettingsPage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-semibold flex items-center gap-2">
               <Palette className="w-4 h-4 text-foreground/50" />
-              {t('settings.theme')}
+              {t('settings:theme')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -107,14 +107,14 @@ export default function SettingsPage() {
                 onClick={toggleTheme}
                 className="rounded-xl h-10 px-5 text-sm font-medium transition-all duration-normal"
               >
-                {t('settings.dark')}
+                {t('settings:dark')}
               </Button>
               <Button
                 variant={theme === 'light' ? 'default' : 'outline'}
                 onClick={toggleTheme}
                 className="rounded-xl h-10 px-5 text-sm font-medium transition-all duration-normal"
               >
-                {t('settings.light')}
+                {t('settings:light')}
               </Button>
             </div>
           </CardContent>
@@ -125,7 +125,7 @@ export default function SettingsPage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-semibold flex items-center gap-2">
               <Globe className="w-4 h-4 text-foreground/50" />
-              {t('settings.language')}
+              {t('settings:language')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -153,7 +153,7 @@ export default function SettingsPage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-semibold flex items-center gap-2">
               <Key className="w-4 h-4 text-foreground/50" />
-              {t('settings.apiKeys')}
+              {t('settings:apiKeys')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -166,7 +166,7 @@ export default function SettingsPage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-semibold flex items-center gap-2">
               <HardDrive className="w-4 h-4 text-foreground/50" />
-              {t('settings.backup')}
+              {t('settings:backup')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -213,10 +213,10 @@ function ApiKeysManager() {
       if (d.code === 0) {
         setApiKey('');
         fetchKeys();
-        toast.success(t('common.success') as string);
-      } else toast.error(d.message || t('common.error') as string);
+        toast.success(t('common:success') as string);
+      } else toast.error(d.message || t('common:error') as string);
     } catch {
-      toast.error(t('common.error') as string);
+      toast.error(t('common:error') as string);
     }
     setSaving(false);
   };
@@ -226,21 +226,21 @@ function ApiKeysManager() {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="text-xs font-medium text-muted-foreground block mb-1.5">
-            {t('settings.provider')}
+            {t('settings:provider')}
           </label>
           <select
             value={provider}
             onChange={(e) => setProvider(e.target.value)}
             className="w-full h-9 px-3 rounded-xl bg-muted/50 border border-border/60 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring/20 transition-all duration-fast"
           >
-            <option value="anthropic">{t('models.anthropic')}</option>
-            <option value="openai">{t('models.openai')}</option>
-            <option value="ollama">{t('models.ollama')}</option>
+            <option value="anthropic">{t('models:anthropic')}</option>
+            <option value="openai">{t('models:openai')}</option>
+            <option value="ollama">{t('models:ollama')}</option>
           </select>
         </div>
         <div>
           <label className="text-xs font-medium text-muted-foreground block mb-1.5">
-            {t('settings.model')}
+            {t('settings:model')}
           </label>
           <Input
             value={model}
@@ -250,7 +250,7 @@ function ApiKeysManager() {
         </div>
       </div>
       <div>
-        <label className="text-xs font-medium text-muted-foreground block mb-1.5">{t('settings.apiKey')}</label>
+        <label className="text-xs font-medium text-muted-foreground block mb-1.5">{t('settings:apiKey')}</label>
         <Input
           type="password"
           value={apiKey}
@@ -260,7 +260,7 @@ function ApiKeysManager() {
         />
       </div>
       <div>
-        <label className="text-xs font-medium text-muted-foreground block mb-1.5">{t('settings.baseUrl')}</label>
+        <label className="text-xs font-medium text-muted-foreground block mb-1.5">{t('settings:baseUrl')}</label>
         <Input
           value={baseUrl}
           onChange={(e) => setBaseUrl(e.target.value)}
@@ -272,7 +272,7 @@ function ApiKeysManager() {
         disabled={saving || !apiKey.trim()}
         className="rounded-xl h-9 px-4 text-sm font-medium transition-all duration-normal"
       >
-        {saving ? t('settings.saving') : t('settings.save')}
+        {saving ? t('settings:saving') : t('settings:save')}
       </Button>
 
       {/* Existing keys */}
@@ -284,7 +284,7 @@ function ApiKeysManager() {
               className="flex items-center justify-between text-xs text-muted-foreground p-3 rounded-xl bg-muted/30 border border-border/30"
             >
               <span className="font-medium">{k.provider} / {k.model}</span>
-              <span>{k.hasKey ? '••••' : t('settings.apiKeyNone')}</span>
+              <span>{k.hasKey ? '••••' : t('settings:apiKeyNone')}</span>
             </div>
           ))}
         </div>
@@ -318,16 +318,16 @@ function BackupManager() {
       const d = await res.json();
       if (d.code === 0) {
         listBackups();
-        toast.success(t('common.success') as string);
+        toast.success(t('common:success') as string);
       }
     } catch {
-      toast.error(t('common.error') as string);
+      toast.error(t('common:error') as string);
     }
     setLoading(false);
   };
 
   const restore = async (name: string) => {
-    if (!confirm(t('settings.backupConfirm', { name }))) return;
+    if (!confirm(t('settings:backupConfirm', { name }))) return;
     try {
       const res = await fetch('/api/backup', {
         method: 'PUT',
@@ -336,11 +336,11 @@ function BackupManager() {
       });
       const d = await res.json();
       if (d.code === 0) {
-        toast.success(t('settings.backupRestored') as string);
+        toast.success(t('settings:backupRestored') as string);
         setTimeout(() => location.reload(), 1500);
       }
     } catch {
-      toast.error(t('common.error') as string);
+      toast.error(t('common:error') as string);
     }
   };
 
@@ -351,7 +351,7 @@ function BackupManager() {
         disabled={loading}
         className="rounded-xl h-9 px-4 text-sm font-medium transition-all duration-normal"
       >
-        {loading ? t('settings.backupCreating') : t('settings.backupCreate')}
+        {loading ? t('settings:backupCreating') : t('settings:backupCreate')}
       </Button>
       <div className="space-y-1.5">
         {backups.map((b: any) => (
@@ -366,12 +366,12 @@ function BackupManager() {
               onClick={() => restore(b.name)}
               className="h-7 px-3 rounded-lg text-xs hover:bg-accent/60 transition-all duration-fast"
             >
-              {t('settings.backupRestore')}
+              {t('settings:backupRestore')}
             </Button>
           </div>
         ))}
         {backups.length === 0 && (
-          <span className="text-xs text-muted-foreground/50 font-medium">{t('settings.backupNone')}</span>
+          <span className="text-xs text-muted-foreground/50 font-medium">{t('settings:backupNone')}</span>
         )}
       </div>
     </div>

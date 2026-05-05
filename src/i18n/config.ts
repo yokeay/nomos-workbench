@@ -48,6 +48,7 @@ export const TRANSLATIONS = {
     timeline: {
       ai: 'AI',
       news: '新闻',
+      updating: '更新中...',
       aiPlaceholder: 'AI 事件将实时显示在这里',
       newsPlaceholder: '新闻将实时显示在这里',
     },
@@ -142,6 +143,7 @@ export const TRANSLATIONS = {
     timeline: {
       ai: 'AI',
       news: 'News',
+      updating: 'Updating...',
       aiPlaceholder: 'AI events will appear here in real-time',
       newsPlaceholder: 'News items will appear here in real-time',
     },

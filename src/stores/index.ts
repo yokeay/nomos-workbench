@@ -87,7 +87,7 @@ interface TimelineState {
 }
 
 export const useTimelineStore = create<TimelineState>((set) => ({
-  activeChannel: 'ai',
+  activeChannel: 'news',
   aiScrollPosition: 0,
   newsScrollPosition: 0,
   scrollLocked: false,

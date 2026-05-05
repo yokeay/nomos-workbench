@@ -144,6 +144,24 @@ export const calendarEvents = sqliteTable(`${BUSINESS_PREFIX}calendar_events`, {
 }));
 
 // =====================
+// Global News Timeline (newsnow aggregation)
+// =====================
+
+export const newsTimeline = sqliteTable(`${BUSINESS_PREFIX}news_timeline`, {
+  id: text('id').primaryKey(), // composite: "${sourceId}-${itemId}"
+  sourceId: text('source_id').notNull(),
+  sourceName: text('source_name').notNull(),
+  sourceColor: text('source_color').default('gray'),
+  title: text('title').notNull(),
+  url: text('url').notNull(),
+  extra: text('extra'),
+  pubDate: integer('pub_date'),
+  createdAt: integer('created_at').notNull(),
+}, (table) => ({
+  pubDateIdx: index('news_timeline_pubdate_idx').on(table.pubDate),
+}));
+
+// =====================
 // Audit Logs
 // =====================
 
@@ -189,3 +207,6 @@ export type NewCalendarEvent = typeof calendarEvents.$inferInsert;
 
 export type AuditLog = typeof auditLogs.$inferSelect;
 export type NewAuditLog = typeof auditLogs.$inferInsert;
+
+export type NewsTimelineItem = typeof newsTimeline.$inferSelect;
+export type NewNewsTimelineItem = typeof newsTimeline.$inferInsert;

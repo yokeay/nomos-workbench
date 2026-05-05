@@ -26,7 +26,7 @@ export default function CalendarPage() {
 
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
   const blanks = Array.from({ length: firstDay }, (_, i) => i);
-  const weekdays = t('calendar.weekdays').split(',');
+  const weekdays = t('calendar:weekdays').split(',');
 
   const prevMonth = () => {
     const d = new Date(viewDate);
@@ -131,7 +131,7 @@ export default function CalendarPage() {
               {events.length === 0 && (
                 <Card className="bg-card/40 border-border/40 rounded-2xl p-6 text-center">
                   <p className="text-muted-foreground/60 text-sm font-medium">
-                    {t('calendar.noEvents')}
+                    {t('calendar:noEvents')}
                   </p>
                 </Card>
               )}
