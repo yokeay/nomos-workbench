@@ -25,7 +25,7 @@ export const TRANSLATIONS = {
     },
     chat: {
       title: 'AI 聊天',
-      placeholder: '输入消息...',
+      placeholder: '粘贴图片、文件、文本，Enter 发送',
       modelSelector: '模型',
       streaming: '...',
       userLabel: '你',
@@ -126,7 +126,7 @@ export const TRANSLATIONS = {
     },
     chat: {
       title: 'AI Chat',
-      placeholder: 'Type your message...',
+      placeholder: 'Paste images, files, or text. Enter to send.',
       modelSelector: 'Model',
       streaming: '...',
       userLabel: 'You',

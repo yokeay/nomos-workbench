@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
@@ -10,7 +11,15 @@ import { LayoutDashboard, Calendar, Settings, Terminal } from 'lucide-react';
 export function Sidebar() {
   const { t } = useTranslation();
   const pathname = usePathname();
+  const router = useRouter();
   const { isOpen, open } = useTerminalStore();
+
+  const handleTerminalClick = () => {
+    open();
+    if (pathname !== '/dashboard') {
+      router.push('/dashboard');
+    }
+  };
 
   const navItems = [
     { href: '/dashboard', label: t('sidebar:dashboard'), icon: LayoutDashboard },
@@ -20,15 +29,8 @@ export function Sidebar() {
 
   return (
     <aside className="w-16 bg-sidebar border-r border-sidebar-border flex flex-col h-full shrink-0 z-20">
-      {/* Logo */}
-      <div className="h-14 flex items-center justify-center border-b border-sidebar-border">
-        <span className="text-foreground font-bold text-lg tracking-tight select-none">
-          N
-        </span>
-      </div>
-
       {/* Navigation */}
-      <nav className="flex-1 py-3 space-y-1 px-2">
+      <nav className="flex-1 pt-1 pb-3 space-y-1 px-2">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
@@ -48,15 +50,13 @@ export function Sidebar() {
             </Link>
           );
         })}
-      </nav>
 
-      {/* Terminal Toggle */}
-      <div className="py-3 px-2 border-t border-sidebar-border">
+        {/* Terminal Toggle — inline with nav items */}
         <button
-          onClick={() => !isOpen && open()}
+          onClick={handleTerminalClick}
           title={t('sidebar:terminal')}
           className={cn(
-            'w-full h-11 flex items-center justify-center rounded-xl transition-all duration-normal',
+            'relative flex items-center justify-center h-11 rounded-xl transition-all duration-normal w-full',
             isOpen
               ? 'bg-sidebar-active text-sidebar-foreground shadow-subtle'
               : 'text-muted-foreground/60 hover:text-sidebar-foreground/80 hover:bg-sidebar-hover'
@@ -64,7 +64,7 @@ export function Sidebar() {
         >
           <Terminal className="w-5 h-5" />
         </button>
-      </div>
+      </nav>
     </aside>
   );
 }
