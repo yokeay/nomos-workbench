@@ -1,6 +1,8 @@
 import * as schema from './schema';
 import type { InferInsertModel } from 'drizzle-orm';
+import type { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 
+type DrizzleDB = BetterSQLite3Database<typeof schema>;
 
 // ==================== 业务前缀配置 ====================
 const ENV = process.env.NOMOS_ENV || 'dev';
@@ -23,6 +25,7 @@ export const TABLES = {
   memos: `${BUSINESS_PREFIX}memos`,
   memoAttachments: `${BUSINESS_PREFIX}memo_attachments`,
   calendarEvents: `${BUSINESS_PREFIX}calendar_events`,
+  storageConfig: `${BUSINESS_PREFIX}storage_config`,
 } as const;
 
 // ==================== Lazy DB connection ====================
@@ -31,7 +34,7 @@ export const TABLES = {
 
 const dynamicRequire = eval('require') as NodeRequire;
 
-let _db: ReturnType<typeof import('drizzle-orm/better-sqlite3').drizzle> | null = null;
+let _db: DrizzleDB | null = null;
 
 function getDbPath(): string {
   const dbPath = process.env.DATABASE_URL || dynamicRequire('path').join(process.cwd(), 'data', 'workbench.db');
@@ -47,11 +50,11 @@ function initDb() {
   const { drizzle } = dynamicRequire('drizzle-orm/better-sqlite3');
   const sqlite = new Database(getDbPath());
   sqlite.pragma('journal_mode = WAL');
-  _db = drizzle(sqlite, { schema }) as any;
+  _db = drizzle(sqlite, { schema }) as DrizzleDB;
 }
 
 // Proxy that lazily initializes the db on first access
-export const db = new Proxy({} as NonNullable<typeof _db>, {
+export const db = new Proxy({} as DrizzleDB, {
   get(_target, prop, receiver) {
     if (!_db) initDb();
     return Reflect.get(_db as object, prop, receiver);

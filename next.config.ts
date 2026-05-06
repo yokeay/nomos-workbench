@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
     },
   },
   serverExternalPackages: ['better-sqlite3'],
+  turbopack: {},
   webpack: (config, { isServer }) => {
     if (isServer) {
       const origExternals = config.externals;

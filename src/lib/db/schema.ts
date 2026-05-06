@@ -186,6 +186,14 @@ export const memoAttachments = sqliteTable(`${BUSINESS_PREFIX}memo_attachments`,
   createdAt: integer('created_at').notNull(),
 });
 
+// Storage configuration
+export const storageConfig = sqliteTable(`${BUSINESS_PREFIX}storage_config`, {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  provider: text('provider').notNull().default('local'),
+  config: text('config').notNull().default('{}'),
+  updatedAt: integer('updated_at').notNull(),
+});
+
 // =====================
 // Audit Logs
 // =====================
@@ -241,3 +249,6 @@ export type NewMemo = typeof memos.$inferInsert;
 
 export type MemoAttachment = typeof memoAttachments.$inferSelect;
 export type NewMemoAttachment = typeof memoAttachments.$inferInsert;
+
+export type StorageConfig = typeof storageConfig.$inferSelect;
+export type NewStorageConfig = typeof storageConfig.$inferInsert;

@@ -1,10 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { v4 as uuidv4 } from 'uuid'
-import { mkdir, writeFile } from 'fs/promises'
-import { join } from 'path'
-
-const UPLOAD_DIR = join(process.cwd(), 'public', 'uploads', 'memos')
-const MAX_SIZE = 10 * 1024 * 1024 // 10MB
+import { getStorageAdapter } from '@/lib/storage'
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,29 +10,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ code: 1003, message: 'No files provided', data: null }, { status: 400 })
     }
 
-    await mkdir(UPLOAD_DIR, { recursive: true })
+    const adapter = await getStorageAdapter()
 
     const results = []
     for (const file of files) {
-      if (file.size > MAX_SIZE) {
-        continue
+      try {
+        const result = await adapter.upload(file)
+        results.push(result)
+      } catch (e: any) {
+        console.error('Upload error for', file.name, ':', e.message)
       }
-
-      const ext = file.name.split('.').pop() || 'bin'
-      const id = uuidv4()
-      const filename = `${id}.${ext}`
-      const filepath = join(UPLOAD_DIR, filename)
-
-      const buffer = Buffer.from(await file.arrayBuffer())
-      await writeFile(filepath, buffer)
-
-      results.push({
-        id,
-        filename: file.name,
-        url: `/uploads/memos/${filename}`,
-        size: file.size,
-        mimeType: file.type,
-      })
     }
 
     return NextResponse.json({ code: 0, message: 'ok', data: results })

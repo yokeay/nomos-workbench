@@ -1,5 +1,38 @@
 # NOMOS Workbench - 版本迭代记录
 
+## v0.2.3 - 2026-05-06
+
+### 变更内容
+- **文件存储适配器**：新增 S3 和 DUFS 存储后端支持，默认使用本地存储
+- **存储配置页面**：设置页面新增「文件存储」配置卡片，支持三种存储方式切换
+- **Storage Adapter 模式**：统一 `StorageAdapter` 接口，本地/S3/DUFS 三种实现
+- **DB 类型修复**：修复 Drizzle ORM `never` 类型推断问题（53 个 TS 错误全部消除）
+- **Turbopack 配置**：添加 `turbopack: {}` 配置兼容 Next.js 16 默认 Turbopack 构建
+
+### 新增文件
+- `src/lib/storage/types.ts` — StorageAdapter 接口 + 各 Provider Config 类型
+- `src/lib/storage/adapters/local.ts` — 本地文件系统适配器
+- `src/lib/storage/adapters/s3.ts` — S3 适配器（@aws-sdk/client-s3）
+- `src/lib/storage/adapters/dufs.ts` — DUFS 适配器（HTTP PUT）
+- `src/lib/storage/index.ts` — getStorageAdapter() 工厂函数
+- `src/app/api/settings/storage/route.ts` — Storage 配置 CRUD API
+
+### 修改文件
+- `src/lib/db/schema.ts` — 新增 storage_config 表
+- `src/lib/db/index.ts` — 注册 storageConfig + 修复类型推断
+- `src/app/api/memos/upload/route.ts` — 使用 storage adapter 替代直接写文件
+- `src/app/(dashboard)/settings/page.tsx` — 新增 StorageManager 组件
+- `src/i18n/config.ts` — 新增存储相关翻译 key
+- `next.config.ts` — 添加 turbopack 配置 + $client 修复
+- `package.json` — 新增 @aws-sdk/client-s3 依赖 + 版本号 0.2.3
+
+### 影响范围
+- Memos 文件上传向后兼容，默认本地存储行为不变
+- 设置页面可切换 S3/DUFS 存储，配置保存后即时生效
+- SecretKey 在 GET 时脱敏返回，PUT 时保留旧值防止意外覆盖
+
+---
+
 ## v0.2.2 - 2026-05-06
 
 ### 变更内容

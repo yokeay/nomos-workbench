@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { User, Palette, Globe, Key, HardDrive, Save } from 'lucide-react';
+import { User, Palette, Globe, Key, HardDrive, Save, Server } from 'lucide-react';
 
 export default function SettingsPage() {
   const { t } = useTranslation();
@@ -161,6 +161,19 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
+        {/* Storage */}
+        <Card className="bg-card/60 border-border/60 shadow-sm-soft rounded-2xl">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base font-semibold flex items-center gap-2">
+              <Server className="w-4 h-4 text-foreground/50" />
+              {t('settings:storage')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <StorageManager />
+          </CardContent>
+        </Card>
+
         {/* Backup */}
         <Card className="bg-card/60 border-border/60 shadow-sm-soft rounded-2xl">
           <CardHeader className="pb-2">
@@ -289,6 +302,179 @@ function ApiKeysManager() {
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+function StorageManager() {
+  const { t } = useTranslation();
+  const [provider, setProvider] = useState('local');
+  const [s3Endpoint, setS3Endpoint] = useState('');
+  const [s3Region, setS3Region] = useState('');
+  const [s3Bucket, setS3Bucket] = useState('');
+  const [s3AccessKey, setS3AccessKey] = useState('');
+  const [s3SecretKey, setS3SecretKey] = useState('');
+  const [s3PublicUrl, setS3PublicUrl] = useState('');
+  const [dufsUrl, setDufsUrl] = useState('');
+  const [saving, setSaving] = useState(false);
+  const toast = useToast();
+
+  useEffect(() => {
+    fetch('/api/settings/storage')
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.code === 0 && d.data) {
+          setProvider(d.data.provider || 'local');
+          const c = d.data.config || {};
+          if (d.data.provider === 's3') {
+            setS3Endpoint(c.endpoint || '');
+            setS3Region(c.region || '');
+            setS3Bucket(c.bucket || '');
+            setS3AccessKey(c.accessKey || '');
+            setS3SecretKey(c.secretKey || '');
+            setS3PublicUrl(c.publicUrl || '');
+          } else if (d.data.provider === 'dufs') {
+            setDufsUrl(c.serverUrl || '');
+          }
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      let config: any = {};
+      if (provider === 's3') {
+        config = { endpoint: s3Endpoint, region: s3Region, bucket: s3Bucket, accessKey: s3AccessKey, secretKey: s3SecretKey, publicUrl: s3PublicUrl };
+      } else if (provider === 'dufs') {
+        config = { serverUrl: dufsUrl };
+      }
+
+      const res = await fetch('/api/settings/storage', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ provider, config }),
+      });
+      const d = await res.json();
+      if (d.code === 0) toast.success(t('common:success') as string);
+      else toast.error(d.message || t('common:error') as string);
+    } catch {
+      toast.error(t('common:error') as string);
+    }
+    setSaving(false);
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Provider selector */}
+      <div>
+        <label className="text-xs font-medium text-muted-foreground block mb-2">
+          {t('settings:storageProvider')}
+        </label>
+        <div className="flex gap-2">
+          {(['local', 's3', 'dufs'] as const).map((p) => (
+            <Button
+              key={p}
+              variant={provider === p ? 'default' : 'outline'}
+              onClick={() => setProvider(p)}
+              className="rounded-xl h-9 px-4 text-sm font-medium transition-all duration-normal"
+            >
+              {p === 'local' ? t('settings:storageLocal') : p === 's3' ? t('settings:storageS3') : t('settings:storageDufs')}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      {/* Local desc */}
+      {provider === 'local' && (
+        <p className="text-xs text-muted-foreground/50">{t('settings:storageLocalDesc')}</p>
+      )}
+
+      {/* S3 config */}
+      {provider === 's3' && (
+        <div className="space-y-3">
+          <div>
+            <label className="text-xs font-medium text-muted-foreground block mb-1.5">{t('settings:storageEndpoint')}</label>
+            <Input
+              value={s3Endpoint}
+              onChange={(e) => setS3Endpoint(e.target.value)}
+              placeholder="https://s3.amazonaws.com"
+              className="h-9 bg-muted/50 border-border/60 rounded-xl text-sm"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-medium text-muted-foreground block mb-1.5">{t('settings:storageRegion')}</label>
+              <Input
+                value={s3Region}
+                onChange={(e) => setS3Region(e.target.value)}
+                placeholder="us-east-1"
+                className="h-9 bg-muted/50 border-border/60 rounded-xl text-sm"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground block mb-1.5">{t('settings:storageBucket')}</label>
+              <Input
+                value={s3Bucket}
+                onChange={(e) => setS3Bucket(e.target.value)}
+                placeholder="my-bucket"
+                className="h-9 bg-muted/50 border-border/60 rounded-xl text-sm"
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-medium text-muted-foreground block mb-1.5">{t('settings:storageAccessKey')}</label>
+              <Input
+                value={s3AccessKey}
+                onChange={(e) => setS3AccessKey(e.target.value)}
+                className="h-9 bg-muted/50 border-border/60 rounded-xl text-sm"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground block mb-1.5">{t('settings:storageSecretKey')}</label>
+              <Input
+                type="password"
+                value={s3SecretKey}
+                onChange={(e) => setS3SecretKey(e.target.value)}
+                className="h-9 bg-muted/50 border-border/60 rounded-xl text-sm"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="text-xs font-medium text-muted-foreground block mb-1.5">{t('settings:storagePublicUrl')}</label>
+            <Input
+              value={s3PublicUrl}
+              onChange={(e) => setS3PublicUrl(e.target.value)}
+              placeholder="https://cdn.example.com"
+              className="h-9 bg-muted/50 border-border/60 rounded-xl text-sm"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* DUFS config */}
+      {provider === 'dufs' && (
+        <div>
+          <label className="text-xs font-medium text-muted-foreground block mb-1.5">{t('settings:storageServerUrl')}</label>
+          <Input
+            value={dufsUrl}
+            onChange={(e) => setDufsUrl(e.target.value)}
+            placeholder="http://192.168.1.100:5000"
+            className="h-9 bg-muted/50 border-border/60 rounded-xl text-sm"
+          />
+          <p className="text-[10px] text-muted-foreground/40 mt-1">{t('settings:storageServerUrlDesc')}</p>
+        </div>
+      )}
+
+      <Button
+        onClick={handleSave}
+        disabled={saving}
+        className="rounded-xl h-9 px-4 text-sm font-medium transition-all duration-normal"
+      >
+        {saving ? t('settings:saving') : t('settings:save')}
+      </Button>
     </div>
   );
 }
