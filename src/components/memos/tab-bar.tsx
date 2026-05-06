@@ -24,7 +24,7 @@ export function TabBar({ activeTab, onTabChange }: TabBarProps) {
           key={tab.key}
           onClick={() => onTabChange(tab.key)}
           className={cn(
-            'flex-1 flex items-center justify-center gap-0.5 px-0.5 py-2 text-[10px] font-medium transition-colors duration-fast whitespace-nowrap',
+            'flex-1 flex items-center justify-center gap-1 px-2 py-2 text-xs font-medium transition-colors duration-fast',
             'border-b-2 -mb-px',
             activeTab === tab.key
               ? 'border-foreground text-foreground'

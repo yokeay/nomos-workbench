@@ -54,7 +54,7 @@ export function SmallCalendar({ onDateChange }: SmallCalendarProps) {
       {/* Day names */}
       <div className="grid grid-cols-7 gap-0.5 mb-0.5">
         {DAY_NAMES.map((d) => (
-          <div key={d} className="text-[9px] text-muted-foreground/40 text-center w-[23px] h-4 flex items-center justify-center">
+          <div key={d} className="text-[9px] text-muted-foreground/40 text-center w-5 h-4 flex items-center justify-center">
             {d}
           </div>
         ))}
@@ -63,7 +63,7 @@ export function SmallCalendar({ onDateChange }: SmallCalendarProps) {
       {/* Day cells */}
       <div className="grid grid-cols-7 gap-0.5">
         {Array.from({ length: offset }).map((_, i) => (
-          <div key={`empty-${i}`} className="w-[23px] h-[22px]" />
+          <div key={`empty-${i}`} className="w-5 h-[22px]" />
         ))}
         {Array.from({ length: daysInMonth }).map((_, i) => {
           const day = i + 1
@@ -76,7 +76,7 @@ export function SmallCalendar({ onDateChange }: SmallCalendarProps) {
               key={day}
               onClick={() => handleSelect(day)}
               className={cn(
-                'w-[23px] h-[22px] text-[10px] rounded-full flex items-center justify-center transition-colors duration-fast',
+                'w-5 h-[22px] text-[10px] rounded-full flex items-center justify-center transition-colors duration-fast',
                 isSelected
                   ? 'bg-foreground text-background font-medium'
                   : isToday
