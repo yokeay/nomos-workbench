@@ -265,7 +265,7 @@ function NewsTimeline() {
     revealNext();
   }, [revealNext]);
 
-  // Add new items to cache (from SSE or polling)
+  // Add new items to cache (from SSE or polling) — prepend to top, don't clear existing
   const addToCache = useCallback((incoming: any[]) => {
     const novel = incoming.filter((item: any) => {
       const key = itemKey(item);
@@ -279,16 +279,18 @@ function NewsTimeline() {
     const merged = sortDesc([...allItemsRef.current, ...novel]);
     allItemsRef.current = merged;
 
-    // Reset reveal and restart
-    revealIndexRef.current = 0;
-    setDisplayItems([]);
+    // Prepend novel items at top (they're newer than existing displayItems)
+    // Don't reset reveal — keep revealing older items from bottom
+    setDisplayItems((prev) => {
+      // Novel items are newest → go at top
+      const novelSorted = sortDesc(novel);
+      const next = [...novelSorted, ...prev];
+      if (next.length > 300) next.length = 300;
+      return next;
+    });
 
-    if (revealTimerRef.current) {
-      clearInterval(revealTimerRef.current);
-    }
-    revealTimerRef.current = setInterval(revealNext, 2000);
-    revealNext();
-  }, [revealNext]);
+    // revealIndexRef stays unchanged — novel items insert at top, end positions don't shift
+  }, []);
 
   // Set initial cache
   const setInitialCache = useCallback((items: any[]) => {
@@ -404,7 +406,7 @@ function NewsTimeline() {
             const dotClass = sourceColorMap[color] || 'bg-gray-500';
             return (
               <a
-                key={`${item.sourceId}-${item.id}-${idx}`}
+                key={`${item.sourceId}-${item.id}`}
                 href={item.url}
                 target="_blank"
                 rel="noopener noreferrer"
