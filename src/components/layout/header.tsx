@@ -81,6 +81,9 @@ export function Header() {
             <span>K</span>
           </div>
         </div>
+
+        {/* Weather + Location */}
+        <WeatherWidget />
       </div>
 
       {/* Spacer */}
@@ -97,9 +100,6 @@ export function Header() {
             {dateBottom}
           </span>
         </div>
-
-        {/* Weather + Location */}
-        <WeatherWidget />
 
         <DropdownMenu>
           <DropdownMenuTrigger className="focus:outline-none group">
