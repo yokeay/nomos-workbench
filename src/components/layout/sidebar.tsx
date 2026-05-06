@@ -4,7 +4,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { useTerminalStore } from '@/stores';
-import { LayoutDashboard, Calendar, Settings, Terminal, StickyNote } from 'lucide-react';
+import { Globe, LayoutDashboard, Calendar, Settings, Terminal } from 'lucide-react';
 
 export function Sidebar() {
   const { t } = useTranslation();
@@ -20,9 +20,9 @@ export function Sidebar() {
   };
 
   const navItems = [
-    { href: '/memos', label: 'Memos', icon: StickyNote },
+    { href: '/dashboard', label: '首页', icon: Globe },
     { href: '/tags', label: t('sidebar:tags'), icon: LayoutDashboard },
-    { href: '/calendar', label: t('sidebar:calendar'), icon: Calendar },
+    { href: '/memos', label: t('sidebar:calendar'), icon: Calendar },
     { href: '/settings', label: t('sidebar:settings'), icon: Settings },
   ];
 
