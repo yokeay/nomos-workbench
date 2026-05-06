@@ -1,5 +1,59 @@
 # NOMOS Workbench - 版本迭代记录
 
+## v0.2.5 - 2026-05-06
+
+### 变更内容
+- **终端 WebSocket URL 配置**：设置页面新增「终端」配置卡片，用户可自定义 gotty WebSocket 地址
+- **TerminalManager 组件**：设置页面新增终端配置卡片，保存到 localStorage（key: `nomos_terminal_ws_url`）
+- **终端组件适配**：terminal-card 读取逻辑改为 localStorage 优先 → 环境变量 → 默认值
+
+### 修改文件
+- `src/app/(dashboard)/settings/page.tsx` — 新增 TerminalManager 组件
+- `src/components/terminal/terminal-card.tsx` — localStorage 读取 WS URL
+- `src/i18n/config.ts` — 新增 terminal 相关翻译 key（zh/en）
+
+---
+
+## v0.2.4 - 2026-05-06
+
+### 变更内容
+- **登录系统**：NextAuth v5 GitHub OAuth + 账号密码双登录方式，管理员仅限 GitHub 登录
+- **头像迁移**：用户头像从 Header 右上角迁移到 Sidebar 左下角，弹窗右侧展开
+- **操作保护**：Memos 编辑器/Settings 保存/API 写入操作增加登录门控，未登录禁止操作
+- **Toast 居中**：所有 toast 提示从右上角移到顶部居中位置
+- **DUFS 图片代理**：新增 `/api/storage/raw/[...path]` 代理端点，解决 DUFS HTTP Basic Auth 导致浏览器 `<img>` 403 问题
+- **Markdown 渲染**：Memos 时间线和详情抽屉使用 react-markdown + remark-gfm 渲染
+- **Memos 数据修复**：修复前端 data.items → data 解析错误，笔记正确展示
+- **DB 表修复**：创建缺失的 `nomos_dev_storage_config` 表，修复存储配置保存失败
+- **设置页面滚动条隐藏**：overflow-auto → overflow-auto no-scrollbar
+
+### 数据库变更
+- `nomos_dev_users` 表：新增 `role` TEXT NOT NULL DEFAULT 'user'、`github_id` TEXT 字段
+- `nomos_dev_storage_config` 表：手动创建（Drizzle schema 已定义但迁移未执行）
+
+### 新增文件
+- `src/types/next-auth.d.ts` — NextAuth 类型扩充（Session/User/JWT role）
+- `src/app/login/page.tsx` — 登录页面（GitHub + Credentials 双 Tab）
+- `src/hooks/use-auth.ts` — 便捷 auth hook
+- `src/app/api/storage/raw/[...path]/route.ts` — DUFS 图片代理端点
+- `scripts/migrate-users-roles.ts` — 数据库迁移脚本
+
+### 修改文件
+- `src/lib/db/schema.ts` — users 表新增 role/githubId
+- `src/lib/auth/index.ts` — 新增 GitHub provider、signIn callback、管理员拦截
+- `src/app/(dashboard)/layout.tsx` — SessionProvider 包裹
+- `src/components/layout/sidebar.tsx` — 左下角头像 + 登录/退出
+- `src/components/layout/header.tsx` — 删除右侧头像
+- `src/components/ui/toaster.tsx` — Toast 居中
+- `src/components/memos/memos-timeline.tsx` — Markdown 渲染 + urlTransform
+- `src/components/memos/memo-detail-drawer.tsx` — Markdown 渲染 + urlTransform
+- `src/app/(dashboard)/settings/page.tsx` — 登录门控 + scrollbar 隐藏
+- `src/i18n/config.ts` — 新增 login namespace
+- `tailwind.config.ts` — 新增 @tailwindcss/typography 插件
+- `.env.example` — 新增 GitHub OAuth + ADMIN_EMAILS
+
+---
+
 ## v0.2.3 - 2026-05-06
 
 ### 变更内容
