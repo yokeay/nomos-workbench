@@ -60,7 +60,7 @@ export default function MemosPage() {
         <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
 
         {/* Tab content below */}
-        <div className="flex-1 overflow-auto scrollbar-none">
+        <div className="flex-1 overflow-auto no-scrollbar">
           {activeTab === 'history' && <HistoryDisplay />}
           {activeTab === 'almanac' && <AlmanacDisplay />}
         </div>
@@ -74,7 +74,7 @@ export default function MemosPage() {
             <MemosEditor onPublish={handlePublish} publishing={publishing} />
 
             {/* Timeline */}
-            <div className="flex-1 overflow-auto scrollbar-none">
+            <div className="flex-1 overflow-auto no-scrollbar">
               <MemosTimeline
                 refreshKey={refreshKey}
                 onSelectMemo={handleSelectMemo}

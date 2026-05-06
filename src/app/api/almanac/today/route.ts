@@ -1,5 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { toLunar } from 'lunar'
+import { Solar } from 'lunar-typescript'
+
+const LUNAR_MONTHS = ['正月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '冬月', '腊月']
+
+const LUNAR_DAYS = [
+  '初一', '初二', '初三', '初四', '初五', '初六', '初七', '初八', '初九', '初十',
+  '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八', '十九', '二十',
+  '廿一', '廿二', '廿三', '廿四', '廿五', '廿六', '廿七', '廿八', '廿九', '三十',
+]
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,35 +19,60 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ code: 1003, message: 'Invalid date', data: null }, { status: 400 })
     }
 
-    const result = toLunar(date)
-    const lunar = result.lunar
+    const solar = Solar.fromDate(date)
+    const lunar = solar.getLunar()
 
-    // Solar terms for the date (if any)
-    const solarTerms: Record<string, string> = {
-      '01-05': '小寒', '01-20': '大寒', '02-04': '立春', '02-19': '雨水',
-      '03-05': '惊蛰', '03-20': '春分', '04-05': '清明', '04-20': '谷雨',
-      '05-05': '立夏', '05-21': '小满', '06-05': '芒种', '06-21': '夏至',
-      '07-07': '小暑', '07-22': '大暑', '08-07': '立秋', '08-23': '处暑',
-      '09-08': '白露', '09-23': '秋分', '10-08': '寒露', '10-23': '霜降',
-      '11-07': '立冬', '11-22': '小雪', '12-07': '大雪', '12-22': '冬至',
-    }
-    const key = `${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
-    const solarTerm = solarTerms[key] || null
+    const baZi = lunar.getBaZi()
+    const baZiWuXing = lunar.getBaZiWuXing()
+    const baZiNaYin = lunar.getBaZiNaYin()
 
-    // Basic zodiac fortune
-    const zodiacAnimals = ['鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪']
-    const zodiac = zodiacAnimals[(date.getFullYear() - 4) % 12]
+    const lunarMonth = lunar.getMonth()
+    const lunarDay = lunar.getDay()
+    const monthStr = LUNAR_MONTHS[lunarMonth - 1] || `${lunarMonth}月`
+    const dayStr = LUNAR_DAYS[lunarDay - 1] || `${lunarDay}`
 
     return NextResponse.json({
       code: 0,
       message: 'ok',
       data: {
         solarDate: dateStr,
-        lunarMonth: lunar.month,
-        lunarDay: lunar.day,
-        isLeapMonth: lunar.isLeapMonth,
-        yearZodiac: zodiac,
-        solarTerm,
+        lunarMonth,
+        lunarDay,
+        isLeapMonth: lunar.getMonth() < 0,
+        lunarMonthName: (lunar.getMonth() < 0 ? '闰' : '') + monthStr,
+        lunarDayName: dayStr,
+        yearZodiac: lunar.getYearShengXiao(),
+        dayZodiac: lunar.getDayShengXiao(),
+        solarTerm: lunar.getJieQi() || null,
+
+        // BaZi
+        baZi: { year: baZi[0], month: baZi[1], day: baZi[2], hour: baZi[3] },
+        baZiWuXing: { year: baZiWuXing[0], month: baZiWuXing[1], day: baZiWuXing[2], hour: baZiWuXing[3] },
+        baZiNaYin: { year: baZiNaYin[0], month: baZiNaYin[1], day: baZiNaYin[2], hour: baZiNaYin[3] },
+
+        // Yi / Ji
+        yi: lunar.getDayYi(),
+        ji: lunar.getDayJi(),
+
+        // Chong / Sha
+        chong: lunar.getDayChongDesc(),
+        sha: lunar.getDaySha(),
+
+        // JiShen / XiongSha
+        jiShen: lunar.getDayJiShen(),
+        xiongSha: lunar.getDayXiongSha(),
+
+        // TaiShen
+        taiShen: lunar.getDayPositionTai(),
+
+        // PengZu Baiji
+        pengZuGan: lunar.getPengZuGan(),
+        pengZuZhi: lunar.getPengZuZhi(),
+
+        // Xiu
+        xiu: lunar.getXiu(),
+        xiuSong: lunar.getXiuSong(),
+        xiuLuck: lunar.getXiuLuck(),
       },
     })
   } catch (error) {
