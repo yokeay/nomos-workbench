@@ -1,5 +1,19 @@
 # NOMOS Workbench - 版本迭代记录
 
+## v0.2.1 - 2026-05-06
+
+### 变更内容
+- **新闻时间线持久化**：已展示的新闻条目位置通过 localStorage 持久化，刷新页面不再重置打字机动画
+- **打字机动画优化**：已通过 localStorage 恢复的条目直接显示全文（`instant` 模式），未展示的新条目仍走动画
+
+### 修改文件
+- `src/components/layout/timeline-panel.tsx` — 新增 localStorage 持久化逻辑（saveState/restoreState/restoreRevealed）
+
+### 影响范围
+- 新闻时间线刷新体验：已展示位置不会丢失，继续从上次位置"压账"推进
+
+---
+
 ## v0.2.0 - 2026-05-06
 
 ### 变更内容
