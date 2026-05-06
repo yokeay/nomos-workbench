@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback } from 'react'
+import { useToast } from '@/hooks/use-toast'
 import { SmallCalendar } from '@/components/memos/small-calendar'
 import { TabBar, TabKey } from '@/components/memos/tab-bar'
 import { MemosEditor } from '@/components/memos/memos-editor'
@@ -23,22 +24,24 @@ export default function MemosPage() {
   const [refreshKey, setRefreshKey] = useState(0)
   const [selectedMemo, setSelectedMemo] = useState<Memo | null>(null)
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const toast = useToast()
 
   const handlePublish = useCallback(async (content: string) => {
     setPublishing(true)
     try {
-      await fetch('/api/memos', {
+      const res = await fetch('/api/memos', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content }),
       })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
       setRefreshKey((k) => k + 1)
     } catch {
-      // ignore
+      toast.error('发布失败，请重试')
     } finally {
       setPublishing(false)
     }
-  }, [])
+  }, [toast])
 
   const handleSelectMemo = useCallback((memo: Memo) => {
     setSelectedMemo(memo)

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@/lib/auth'
 import { db, memos } from '@/lib/db'
 import { desc } from 'drizzle-orm'
 import { v4 as uuidv4 } from 'uuid'
@@ -25,12 +26,17 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await auth()
+    if (!session?.user?.id) {
+      return NextResponse.json({ code: 1001, message: 'Unauthorized', data: null }, { status: 401 })
+    }
+
     const body = await request.json()
     const now = Date.now()
 
     const memo = {
       id: uuidv4(),
-      userId: body.userId || 'default',
+      userId: session.user.id,
       content: body.content || '',
       createdAt: now,
       updatedAt: now,

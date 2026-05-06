@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@/lib/auth'
 import { db, memos } from '@/lib/db'
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 
 export async function GET(
   request: NextRequest,
@@ -24,8 +25,14 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await auth()
+    if (!session?.user?.id) {
+      return NextResponse.json({ code: 1001, message: 'Unauthorized', data: null }, { status: 401 })
+    }
+
     const { id } = await params
-    await db.delete(memos).where(eq(memos.id, id))
+    // Only delete if the memo belongs to the authenticated user
+    await db.delete(memos).where(and(eq(memos.id, id), eq(memos.userId, session.user.id)))
     return NextResponse.json({ code: 0, message: 'ok' })
   } catch (error) {
     console.error('Memo DELETE error:', error)
