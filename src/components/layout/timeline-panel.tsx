@@ -211,6 +211,9 @@ function NewsTimeline() {
 
   const sortDesc = (items: any[]) =>
     [...items].sort((a, b) => {
+      const pa = a.sourcePriority ?? 99;
+      const pb = b.sourcePriority ?? 99;
+      if (pa !== pb) return pa - pb;
       const da = a.pubDate ?? 0;
       const db = b.pubDate ?? 0;
       return (db as number) - (da as number) || 0;
@@ -235,12 +238,9 @@ function NewsTimeline() {
     revealIndexRef.current = idx + 1;
 
     setDisplayItems(prev => {
-      const next = [item, ...prev];
-      // 300-item FIFO cap: drop oldest from bottom
-      if (next.length > 300) {
-        next.length = 300;
-      }
-      return next;
+      const key = itemKey(item);
+      if (prev.some(p => itemKey(p) === key)) return prev;
+      return [item, ...prev];
     });
 
     if (revealIndexRef.current >= all.length) {
@@ -284,11 +284,10 @@ function NewsTimeline() {
     // Prepend novel items at top (they're newer than existing displayItems)
     // Don't reset reveal — keep revealing older items from bottom
     setDisplayItems((prev) => {
-      // Novel items are newest → go at top
       const novelSorted = sortDesc(novel);
-      const next = [...novelSorted, ...prev];
-      if (next.length > 300) next.length = 300;
-      return next;
+      const existingKeys = new Set(prev.map(p => itemKey(p)));
+      const trulyNew = novelSorted.filter(n => !existingKeys.has(itemKey(n)));
+      return [...trulyNew, ...prev];
     });
 
     // revealIndexRef stays unchanged — novel items insert at top, end positions don't shift

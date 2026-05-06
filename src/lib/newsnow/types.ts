@@ -20,6 +20,7 @@ export interface TimelineItem extends NewsItem {
   sourceName: string
   sourceColor: string
   sourceColumn?: string
+  sourcePriority?: number
 }
 
 export type SourceGetter = () => Promise<NewsItem[]>
@@ -35,4 +36,5 @@ export interface SourceDefinition {
   home?: string
   disable?: boolean | "cf"
   redirect?: string
+  priority?: number
 }

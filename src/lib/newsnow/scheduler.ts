@@ -80,6 +80,7 @@ async function fetchAndBroadcast() {
           sourceId: id,
           sourceName: sourceMeta.definition.name,
           sourceColor: sourceMeta.definition.color || 'gray',
+          sourcePriority: sourceMeta.definition.priority ?? 99,
         });
       }
     }
@@ -112,6 +113,9 @@ async function fetchAndBroadcast() {
   // Broadcast to SSE clients
   if (clients.size > 0) {
     freshItems.sort((a, b) => {
+      const pa = a.sourcePriority ?? 99;
+      const pb = b.sourcePriority ?? 99;
+      if (pa !== pb) return pa - pb;
       const da = a.pubDate ?? 0;
       const db = b.pubDate ?? 0;
       return (db as number) - (da as number) || 0;
@@ -141,11 +145,15 @@ function buildSnapshot(): TimelineItem[] {
         sourceId: id,
         sourceName: sourceMeta.definition.name,
         sourceColor: sourceMeta.definition.color || 'gray',
+        sourcePriority: sourceMeta.definition.priority ?? 99,
       });
     }
   }
 
   allItems.sort((a, b) => {
+    const pa = a.sourcePriority ?? 99;
+    const pb = b.sourcePriority ?? 99;
+    if (pa !== pb) return pa - pb;
     const da = a.pubDate ?? 0;
     const db = b.pubDate ?? 0;
     return (db as number) - (da as number) || 0;

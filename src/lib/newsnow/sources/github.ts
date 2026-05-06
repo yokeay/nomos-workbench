@@ -31,6 +31,5 @@ const trending = defineSource(async () => {
 })
 
 export default defineSource({
-  "github": trending,
   "github-trending-today": trending,
 })

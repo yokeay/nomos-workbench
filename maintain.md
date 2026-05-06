@@ -1,5 +1,51 @@
 # NOMOS Workbench - 版本迭代记录
 
+## v0.1.5 - 2026-05-06
+
+### 变更内容
+- **新闻优先级排序**：添加 sourcePriority 字段，排序规则：科技(0-1) > 国内(2) > 财经(3) > 国际(4)，同优先级按时间倒序
+- **启用 LINUX DO**：移除 `disable: true`，API 正常可用（HTTP 200），设为最高优先级 0
+- **LinuxDo 抓取器**：`linuxdo-hot` (daily.json) 和 `linuxdo-latest` (latest.json) 两个子源
+
+### 修改文件
+- `src/lib/newsnow/types.ts` — SourceDefinition 新增 `priority` 字段，TimelineItem 新增 `sourcePriority` 字段
+- `src/lib/newsnow/sources.ts` — 所有源分配 priority（0-4），LinuxDo 启用并设为 priority 0
+- `src/lib/newsnow/scheduler.ts` — fetchAndBroadcast/buildSnapshot 添加 sourcePriority + 优先级排序
+- `src/app/api/news/timeline/route.ts` — mapSourceItems 传递 sourcePriority + 全局优先级排序
+- `src/components/layout/timeline-panel.tsx` — sortDesc 先按 priority 再按 pubDate 排序
+
+### 影响范围
+- 新闻时间线排序规则变更：从纯时间排序改为优先级+时间排序
+- LINUX DO 正式激活为最高优先级科技源
+
+---
+
+## v0.1.4 - 2026-05-06
+
+### 变更内容
+- **React 重复 key 错误修复**：移除 9 个源定义中的重复短别名条目（如 `cls`/`cls-telegraph` 同时指向同一函数），消除前端 "Encountered two children with the same key" 报错
+- **组件安全去重**：在 `revealNext` 和 `addToCache` 中添加 displayItems 去重逻辑
+- **移除 300 条展示上限**：`revealNext` 不再截断 displayItems
+
+### 修改文件
+- `src/lib/newsnow/sources/cls/index.ts` — 移除重复的 `"cls": telegraph`
+- `src/lib/newsnow/sources/bilibili.ts` — 移除重复的 `"bilibili": hotSearch`
+- `src/lib/newsnow/sources/wallstreetcn.ts` — 移除重复的 `"wallstreetcn": live`
+- `src/lib/newsnow/sources/_36kr.ts` — 移除重复的 `"36kr": quick`
+- `src/lib/newsnow/sources/chongbuluo.ts` — 移除重复的 `"chongbuluo": hot`
+- `src/lib/newsnow/sources/github.ts` — 移除重复的 `"github": trending`
+- `src/lib/newsnow/sources/linuxdo.ts` — 移除重复的 `"linuxdo": latest`
+- `src/lib/newsnow/sources/mktnews.ts` — 移除重复的 `"mktnews": flash`
+- `src/lib/newsnow/sources/v2ex.ts` — 移除重复的 `"v2ex": share`
+- `src/components/layout/timeline-panel.tsx` — revealNext/addToCache 添加 key 去重
+
+### 影响范围
+- 活跃信息源从 52 个精减为 43 个（消除 9 个重复注册）
+- 前端新闻时间线不再出现重复 key 报错
+- build 预存错误（5 errors with turbopack）与本变更无关
+
+---
+
 ## v0.1.3 - 2026-05-05
 
 ### 变更内容

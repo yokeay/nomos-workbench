@@ -32,6 +32,5 @@ const share = defineSource(async () => {
 })
 
 export default defineSource({
-  "v2ex": share,
   "v2ex-share": share,
 })

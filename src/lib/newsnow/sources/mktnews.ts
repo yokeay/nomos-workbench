@@ -47,6 +47,5 @@ const flash = defineSource(async () => {
 })
 
 export default defineSource({
-  "mktnews": flash,
   "mktnews-flash": flash,
 })
