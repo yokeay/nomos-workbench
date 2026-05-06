@@ -1,5 +1,29 @@
 # NOMOS Workbench - 版本迭代记录
 
+## v0.1.7 - 2026-05-06
+
+### 变更内容
+- **标签网格功能**：侧边栏新增「标签网格」入口，点击进入 macOS Launchpad 风格的标签浏览视图
+- **二级分类导航**：顶部一级大类 tab + 二级分类 tab，切换即时更新下方标签网格
+- **翻页网格**：标签以图标+名称卡片形式展示，每页 20 个，左右箭头翻页，底部圆点指示器
+- **Mock 数据**：5 个一级分类（开发工具/数据存储/AI工具/设计资源/效率工具），15 个二级分类，90+ 标签
+
+### 新增文件
+- `src/lib/tag-grid/types.ts` — 标签网格数据类型（Category / SubCategory / TagItem）
+- `src/lib/tag-grid/mock-data.ts` — 完整 Mock 数据集
+- `src/components/tag-grid/tag-grid-view.tsx` — 标签网格主视图组件
+- `src/app/(dashboard)/tags/page.tsx` — /tags 路由页面
+
+### 修改文件
+- `src/components/layout/sidebar.tsx` — 首个导航项从「仪表盘」改为「标签网格」，路由改为 /tags
+- `src/i18n/config.ts` — sidebar:dashboard → sidebar:tags（中英文）
+
+### 影响范围
+- 侧边栏导航变更，默认视图从聊天改为标签网格
+- /dashboard 路由（AI 聊天）仍然可通过终端按钮访问
+
+---
+
 ## v0.1.6 - 2026-05-06
 
 ### 变更内容

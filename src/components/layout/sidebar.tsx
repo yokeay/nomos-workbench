@@ -22,7 +22,7 @@ export function Sidebar() {
   };
 
   const navItems = [
-    { href: '/dashboard', label: t('sidebar:dashboard'), icon: LayoutDashboard },
+    { href: '/tags', label: t('sidebar:tags'), icon: LayoutDashboard },
     { href: '/calendar', label: t('sidebar:calendar'), icon: Calendar },
     { href: '/settings', label: t('sidebar:settings'), icon: Settings },
   ];

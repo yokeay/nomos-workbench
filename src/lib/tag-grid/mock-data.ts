@@ -1,0 +1,236 @@
+import type { Category } from './types'
+
+export const mockCategories: Category[] = [
+  {
+    id: 'dev-tools',
+    name: '开发工具',
+    subCategories: [
+      {
+        id: 'code-hosting',
+        name: '代码托管',
+        tags: [
+          { id: 'github', name: 'GitHub', color: '#24292f', description: '全球最大代码托管平台', url: 'https://github.com' },
+          { id: 'gitlab', name: 'GitLab', color: '#fc6d26', description: 'DevOps 一体化平台', url: 'https://gitlab.com' },
+          { id: 'gitee', name: 'Gitee', color: '#c71d23', description: '国内代码托管平台', url: 'https://gitee.com' },
+          { id: 'bitbucket', name: 'Bitbucket', color: '#0052cc', description: 'Atlassian 代码托管', url: 'https://bitbucket.org' },
+          { id: 'coding', name: 'Coding', color: '#1890ff', description: '腾讯云开发者平台', url: 'https://coding.net' },
+          { id: 'codeberg', name: 'Codeberg', color: '#2185d0', description: '开源代码托管社区', url: 'https://codeberg.org' },
+          { id: 'sourceforge', name: 'SourceForge', color: '#ff6600', description: '老牌开源托管平台', url: 'https://sourceforge.net' },
+        ],
+      },
+      {
+        id: 'cicd',
+        name: 'CI/CD',
+        tags: [
+          { id: 'github-actions', name: 'GitHub Actions', color: '#2088ff', description: 'GitHub 内置 CI/CD' },
+          { id: 'jenkins', name: 'Jenkins', color: '#d24939', description: '开源自动化服务器' },
+          { id: 'gitlab-ci', name: 'GitLab CI', color: '#fc6d26', description: 'GitLab 内置 CI/CD' },
+          { id: 'circleci', name: 'CircleCI', color: '#343434', description: '云端持续集成平台' },
+          { id: 'drone', name: 'Drone CI', color: '#212121', description: '轻量级容器 CI 工具' },
+          { id: 'argocd', name: 'Argo CD', color: '#ef7b4d', description: 'GitOps 持续交付工具' },
+          { id: 'tekton', name: 'Tekton', color: '#3e6bdb', description: 'K8s 原生 CI/CD 框架' },
+          { id: 'woodpecker', name: 'Woodpecker', color: '#23b4c8', description: '轻量 CI/CD 引擎' },
+        ],
+      },
+      {
+        id: 'monitoring',
+        name: '监控告警',
+        tags: [
+          { id: 'prometheus', name: 'Prometheus', color: '#e6522c', description: '开源监控与告警系统' },
+          { id: 'grafana', name: 'Grafana', color: '#f46800', description: '数据可视化与监控面板' },
+          { id: 'sentry', name: 'Sentry', color: '#362d59', description: '错误追踪与性能监控' },
+          { id: 'datadog', name: 'Datadog', color: '#632ca6', description: '云监控与分析平台' },
+          { id: 'uptime-kuma', name: 'Uptime Kuma', color: '#5cdd8b', description: '自托管服务监控' },
+          { id: 'jaeger', name: 'Jaeger', color: '#60d0e4', description: '分布式追踪系统' },
+        ],
+      },
+      {
+        id: 'containers',
+        name: '容器编排',
+        tags: [
+          { id: 'docker', name: 'Docker', color: '#2496ed', description: '容器化平台' },
+          { id: 'kubernetes', name: 'Kubernetes', color: '#326ce5', description: '容器编排平台' },
+          { id: 'podman', name: 'Podman', color: '#892ca0', description: '无守护进程容器引擎' },
+          { id: 'rancher', name: 'Rancher', color: '#0075a8', description: 'K8s 管理平台' },
+          { id: 'helm', name: 'Helm', color: '#0f1689', description: 'K8s 包管理器' },
+          { id: 'portainer', name: 'Portainer', color: '#13bef9', description: '容器管理 UI' },
+          { id: 'traefik', name: 'Traefik', color: '#24a1c1', description: '云原生反向代理' },
+          { id: 'istio', name: 'Istio', color: '#466bb0', description: '服务网格平台' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'databases',
+    name: '数据存储',
+    subCategories: [
+      {
+        id: 'relational',
+        name: '关系型数据库',
+        tags: [
+          { id: 'postgresql', name: 'PostgreSQL', color: '#4169e1', description: '高级开源关系型数据库' },
+          { id: 'mysql', name: 'MySQL', color: '#4479a1', description: '最流行的开源数据库' },
+          { id: 'mariadb', name: 'MariaDB', color: '#003545', description: 'MySQL 的开源分支' },
+          { id: 'sqlite', name: 'SQLite', color: '#003b57', description: '嵌入式轻量数据库' },
+          { id: 'sqlserver', name: 'SQL Server', color: '#cc2927', description: '微软企业级数据库' },
+          { id: 'tidb', name: 'TiDB', color: '#e6005b', description: '分布式 HTAP 数据库' },
+          { id: 'oceanbase', name: 'OceanBase', color: '#0078ff', description: '蚂蚁集团分布式数据库' },
+        ],
+      },
+      {
+        id: 'nosql',
+        name: 'NoSQL / 缓存',
+        tags: [
+          { id: 'redis', name: 'Redis', color: '#dc382d', description: '高性能内存数据库' },
+          { id: 'mongodb', name: 'MongoDB', color: '#47a248', description: '文档型 NoSQL 数据库' },
+          { id: 'elasticsearch', name: 'Elasticsearch', color: '#00bfb3', description: '分布式搜索与分析引擎' },
+          { id: 'cassandra', name: 'Cassandra', color: '#1287b1', description: '分布式 NoSQL 数据库' },
+          { id: 'neo4j', name: 'Neo4j', color: '#4581c3', description: '图数据库平台' },
+          { id: 'clickhouse', name: 'ClickHouse', color: '#ffcc01', description: '列式分析数据库' },
+          { id: 'influxdb', name: 'InfluxDB', color: '#22adf6', description: '时序数据库' },
+        ],
+      },
+      {
+        id: 'orms',
+        name: 'ORM / 工具',
+        tags: [
+          { id: 'prisma', name: 'Prisma', color: '#0c344b', description: '下一代 Node.js ORM' },
+          { id: 'drizzle', name: 'Drizzle', color: '#c5f74f', description: 'TypeScript 轻量 ORM' },
+          { id: 'typeorm', name: 'TypeORM', color: '#e77500', description: 'TS/JS ORM 框架' },
+          { id: 'gorm', name: 'GORM', color: '#00add8', description: 'Go 语言 ORM 库' },
+          { id: 'sqlalchemy', name: 'SQLAlchemy', color: '#d71f00', description: 'Python SQL 工具包' },
+          { id: 'dbeaver', name: 'DBeaver', color: '#897263', description: '通用数据库管理工具' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ai-tools',
+    name: 'AI 工具',
+    subCategories: [
+      {
+        id: 'llm',
+        name: '大语言模型',
+        tags: [
+          { id: 'chatgpt', name: 'ChatGPT', color: '#74aa9c', description: 'OpenAI 对话模型' },
+          { id: 'claude', name: 'Claude', color: '#d97757', description: 'Anthropic AI 助手' },
+          { id: 'gemini', name: 'Gemini', color: '#8e7cc3', description: 'Google 多模态模型' },
+          { id: 'deepseek', name: 'DeepSeek', color: '#4d6bfe', description: '国产开源大模型' },
+          { id: 'qwen', name: '通义千问', color: '#615ced', description: '阿里云大语言模型' },
+          { id: 'kimi', name: 'Kimi', color: '#07c160', description: '月之暗面长文本模型' },
+          { id: 'doubao', name: '豆包', color: '#3370ff', description: '字节跳动 AI 助手' },
+          { id: 'ernie', name: '文心一言', color: '#2932e1', description: '百度大语言模型' },
+        ],
+      },
+      {
+        id: 'ai-image',
+        name: '图像生成',
+        tags: [
+          { id: 'midjourney', name: 'Midjourney', color: '#000000', description: 'AI 艺术生成平台' },
+          { id: 'dalle', name: 'DALL·E', color: '#10a37f', description: 'OpenAI 图像生成' },
+          { id: 'stable-diffusion', name: 'Stable Diffusion', color: '#a163e6', description: '开源图像生成模型' },
+          { id: 'comfyui', name: 'ComfyUI', color: '#f59e0b', description: '可视化 AI 工作流' },
+          { id: 'runway', name: 'Runway', color: '#000000', description: 'AI 视频生成平台' },
+          { id: 'kling', name: '可灵', color: '#00c9a7', description: '快手 AI 视频生成' },
+        ],
+      },
+      {
+        id: 'ai-code',
+        name: 'AI 编程',
+        tags: [
+          { id: 'copilot', name: 'GitHub Copilot', color: '#000000', description: 'AI 编程助手' },
+          { id: 'cursor', name: 'Cursor', color: '#000000', description: 'AI 原生代码编辑器' },
+          { id: 'windsurf', name: 'Windsurf', color: '#6c5ce7', description: 'AI 驱动 IDE' },
+          { id: 'cline', name: 'Cline', color: '#e44f26', description: 'VS Code AI 扩展' },
+          { id: 'cody', name: 'Cody', color: '#5c6ac4', description: 'Sourcegraph AI 助手' },
+          { id: 'tabnine', name: 'Tabnine', color: '#6c5ce7', description: 'AI 代码补全' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'design',
+    name: '设计资源',
+    subCategories: [
+      {
+        id: 'icon-fonts',
+        name: '图标与字体',
+        tags: [
+          { id: 'lucide', name: 'Lucide', color: '#6563ff', description: '开源 SVG 图标库' },
+          { id: 'fontawesome', name: 'Font Awesome', color: '#528dd7', description: '经典图标字体库' },
+          { id: 'heroicons', name: 'Heroicons', color: '#5e5feb', description: 'Tailwind 团队出品' },
+          { id: 'tabler-icons', name: 'Tabler Icons', color: '#0054a6', description: '线条风格图标集' },
+          { id: 'google-fonts', name: 'Google Fonts', color: '#ea4335', description: '开源 Web 字体库' },
+          { id: 'remixicon', name: 'Remix Icon', color: '#f06292', description: '中性风格图标系统' },
+        ],
+      },
+      {
+        id: 'ui-tools',
+        name: 'UI 工具',
+        tags: [
+          { id: 'figma', name: 'Figma', color: '#a259ff', description: '协作式 UI 设计工具' },
+          { id: 'sketch', name: 'Sketch', color: '#fdad00', description: 'macOS 矢量设计工具' },
+          { id: 'framer', name: 'Framer', color: '#05f', description: '交互式原型工具' },
+          { id: 'canva', name: 'Canva', color: '#00c4cc', description: '在线平面设计平台' },
+          { id: 'penpot', name: 'Penpot', color: '#f04421', description: '开源设计协作平台' },
+          { id: 'excalidraw', name: 'Excalidraw', color: '#6965db', description: '手绘风格白板工具' },
+        ],
+      },
+      {
+        id: 'color-palette',
+        name: '配色方案',
+        tags: [
+          { id: 'tailwind-colors', name: 'Tailwind Colors', color: '#38bdf8', description: 'Tailwind 色板系统' },
+          { id: 'coolors', name: 'Coolors', color: '#8b5cf6', description: '配色方案生成器' },
+          { id: 'radix-colors', name: 'Radix Colors', color: '#ff4ecd', description: '无障碍配色系统' },
+          { id: 'open-color', name: 'Open Color', color: '#40c057', description: '开源配色方案' },
+          { id: 'catppuccin', name: 'Catppuccin', color: '#c6a0f6', description: '柔和护眼配色主题' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'productivity',
+    name: '效率工具',
+    subCategories: [
+      {
+        id: 'notes',
+        name: '笔记与文档',
+        tags: [
+          { id: 'notion', name: 'Notion', color: '#000000', description: '全能协作工作空间' },
+          { id: 'obsidian', name: 'Obsidian', color: '#7c3aed', description: '本地化知识库工具' },
+          { id: 'logseq', name: 'Logseq', color: '#85c8c8', description: '开源大纲笔记' },
+          { id: 'hedgedoc', name: 'HedgeDoc', color: '#b60205', description: '协作 Markdown 编辑器' },
+          { id: 'siyuan', name: '思源笔记', color: '#e27396', description: '国产双向链接笔记' },
+          { id: 'affine', name: 'AFFiNE', color: '#6c8cff', description: '开源 Notion 替代' },
+        ],
+      },
+      {
+        id: 'task-mgmt',
+        name: '任务管理',
+        tags: [
+          { id: 'linear', name: 'Linear', color: '#5e6ad2', description: '现代化项目管理' },
+          { id: 'jira', name: 'Jira', color: '#0052cc', description: '企业级项目跟踪' },
+          { id: 'clickup', name: 'ClickUp', color: '#7b68ee', description: '全能项目管理平台' },
+          { id: 'plane', name: 'Plane', color: '#5e5ce6', description: '开源 Jira 替代' },
+          { id: 'taiga', name: 'Taiga', color: '#9acd32', description: '敏捷项目管理' },
+          { id: 'planka', name: 'Planka', color: '#ec7a5c', description: '开源看板工具' },
+        ],
+      },
+      {
+        id: 'communication',
+        name: '通讯协作',
+        tags: [
+          { id: 'slack', name: 'Slack', color: '#4a154b', description: '团队即时通讯' },
+          { id: 'discord', name: 'Discord', color: '#5865f2', description: '社区语音与文字聊天' },
+          { id: 'teams', name: 'Teams', color: '#6264a7', description: '微软团队协作' },
+          { id: 'feishu', name: '飞书', color: '#3370ff', description: '字节跳动办公套件' },
+          { id: 'dingtalk', name: '钉钉', color: '#0089ff', description: '阿里企业通讯平台' },
+          { id: 'wecom', name: '企业微信', color: '#07c160', description: '腾讯企业通讯工具' },
+          { id: 'mattermost', name: 'Mattermost', color: '#0072c6', description: '开源团队通讯' },
+          { id: 'zulip', name: 'Zulip', color: '#50ad55', description: '话题式团队聊天' },
+        ],
+      },
+    ],
+  },
+]

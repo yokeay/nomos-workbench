@@ -32,7 +32,7 @@ export const TRANSLATIONS = {
       aiLabel: 'AI',
     },
     sidebar: {
-      dashboard: '仪表盘',
+      tags: '标签网格',
       calendar: '日历',
       settings: '设置',
       terminal: '终端',
@@ -133,7 +133,7 @@ export const TRANSLATIONS = {
       aiLabel: 'AI',
     },
     sidebar: {
-      dashboard: 'Dashboard',
+      tags: 'Tag Grid',
       calendar: 'Calendar',
       settings: 'Settings',
       terminal: 'Terminal',
