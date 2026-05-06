@@ -162,6 +162,31 @@ export const newsTimeline = sqliteTable(`${BUSINESS_PREFIX}news_timeline`, {
 }));
 
 // =====================
+// Memos
+// =====================
+
+export const memos = sqliteTable(`${BUSINESS_PREFIX}memos`, {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull().references(() => users.id),
+  content: text('content').notNull(),
+  createdAt: integer('created_at').notNull(),
+  updatedAt: integer('updated_at').notNull(),
+}, (table) => ({
+  userIdx: index('memos_user_idx').on(table.userId),
+  createdIdx: index('memos_created_idx').on(table.createdAt),
+}));
+
+export const memoAttachments = sqliteTable(`${BUSINESS_PREFIX}memo_attachments`, {
+  id: text('id').primaryKey(),
+  memoId: text('memo_id').notNull().references(() => memos.id),
+  filename: text('filename').notNull(),
+  filepath: text('filepath').notNull(),
+  size: integer('size'),
+  mimeType: text('mime_type'),
+  createdAt: integer('created_at').notNull(),
+});
+
+// =====================
 // Audit Logs
 // =====================
 
@@ -210,3 +235,9 @@ export type NewAuditLog = typeof auditLogs.$inferInsert;
 
 export type NewsTimelineItem = typeof newsTimeline.$inferSelect;
 export type NewNewsTimelineItem = typeof newsTimeline.$inferInsert;
+
+export type Memo = typeof memos.$inferSelect;
+export type NewMemo = typeof memos.$inferInsert;
+
+export type MemoAttachment = typeof memoAttachments.$inferSelect;
+export type NewMemoAttachment = typeof memoAttachments.$inferInsert;

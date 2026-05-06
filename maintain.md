@@ -1,5 +1,46 @@
 # NOMOS Workbench - 版本迭代记录
 
+## v0.2.0 - 2026-05-06
+
+### 变更内容
+- **Memos 笔记系统**：新增 /memos 页面，包含小型日历 + 3Tab切换栏 + Markdown编辑器 + 笔记时间线
+- **Markdown 编辑器**：支持剪贴板粘贴图片自动上传、拖放文件上传、Ctrl+Enter 快捷发布
+- **笔记时间线**：左侧竖线时间轴样式，显示所有已发布笔记，点击打开详情抽屉
+- **详情抽屉**：从右侧滑入的抽屉，支持查看笔记全文和删除操作
+- **历史上的今天**：集成 Wikipedia REST API，展示精选/事件/诞辰/忌日
+- **万年历**：集成 `lunar` npm 包，展示农历日期、生肖年、节气信息
+- **侧边栏 Memos 入口**：新增 StickyNote 图标入口，支持 toggle 行为
+- **数据库**：新增 `memos` + `memo_attachments` 表
+- **API 端点**：/api/memos (GET/POST)、/api/memos/[id] (GET/DELETE)、/api/memos/upload (POST)、/api/history/today (GET)、/api/almanac/today (GET)
+
+### 新增文件
+- `src/components/memos/small-calendar.tsx` — 小型月历组件
+- `src/components/memos/tab-bar.tsx` — 3Tab切换栏（笔记/历史上今天/万年历）
+- `src/components/memos/memos-editor.tsx` — Markdown编辑器（粘贴/拖放/上传）
+- `src/components/memos/memos-timeline.tsx` — 笔记时间线（竖线时间轴）
+- `src/components/memos/memo-detail-drawer.tsx` — 笔记详情抽屉（右侧滑入）
+- `src/components/memos/history-display.tsx` — 历史上的今天展示
+- `src/components/memos/almanac-display.tsx` — 万年历展示
+- `src/app/(dashboard)/memos/page.tsx` — Memos 主页面
+- `src/app/(dashboard)/memos/loading.tsx` — Memos 加载骨架屏
+- `src/app/api/memos/route.ts` — 笔记 CRUD 列表
+- `src/app/api/memos/[id]/route.ts` — 笔记单条 CRUD
+- `src/app/api/memos/upload/route.ts` — 文件上传
+- `src/app/api/history/today/route.ts` — 历史上的今天 API
+- `src/app/api/almanac/today/route.ts` — 农历转换 API
+
+### 修改文件
+- `src/components/layout/sidebar.tsx` — 新增 Memos 侧边栏入口
+- `src/lib/db/schema.ts` — 新增 memos + memoAttachments 表
+- `src/lib/db/index.ts` — 注册 memos/memoAttachments 到 TABLES map
+
+### 影响范围
+- 侧边栏新增 Memos 导航入口
+- 数据库新增两张表（memos + memo_attachments）
+- 文件上传存储于 public/uploads/memos/
+
+---
+
 ## v0.1.9 - 2026-05-06
 
 ### 变更内容

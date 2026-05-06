@@ -20,6 +20,9 @@ export const TABLES = {
   sessions: `${BUSINESS_PREFIX}sessions`,
   verificationTokens: `${BUSINESS_PREFIX}verification_tokens`,
   auditLogs: `${BUSINESS_PREFIX}audit_logs`,
+  memos: `${BUSINESS_PREFIX}memos`,
+  memoAttachments: `${BUSINESS_PREFIX}memo_attachments`,
+  calendarEvents: `${BUSINESS_PREFIX}calendar_events`,
 } as const;
 
 // ==================== Lazy DB connection ====================
