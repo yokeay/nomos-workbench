@@ -11,6 +11,7 @@ export interface S3Config {
 
 export interface DufsConfig {
   serverUrl: string
+  authKey: string
 }
 
 export interface UploadResult {

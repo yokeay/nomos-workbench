@@ -2,6 +2,8 @@
 
 import { useState, useCallback } from 'react'
 import { useToast } from '@/hooks/use-toast'
+import { useAuth } from '@/hooks/use-auth'
+import { LogIn } from 'lucide-react'
 import { SmallCalendar } from '@/components/memos/small-calendar'
 import { TabBar, TabKey } from '@/components/memos/tab-bar'
 import { MemosEditor } from '@/components/memos/memos-editor'
@@ -24,6 +26,7 @@ export default function MemosPage() {
   const [refreshKey, setRefreshKey] = useState(0)
   const [selectedMemo, setSelectedMemo] = useState<Memo | null>(null)
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const { isLoggedIn, isLoading } = useAuth()
   const toast = useToast()
 
   const handlePublish = useCallback(async (content: string) => {
@@ -73,16 +76,31 @@ export default function MemosPage() {
       <div className="flex-1 flex flex-col min-w-0">
         {activeTab === 'notes' ? (
           <div className="flex-1 flex flex-col p-4 gap-4 overflow-auto">
-            {/* Editor */}
-            <MemosEditor onPublish={handlePublish} publishing={publishing} />
+            {isLoading ? null : isLoggedIn ? (
+              <>
+                {/* Editor */}
+                <MemosEditor onPublish={handlePublish} publishing={publishing} />
 
-            {/* Timeline */}
-            <div className="flex-1 overflow-auto no-scrollbar">
-              <MemosTimeline
-                refreshKey={refreshKey}
-                onSelectMemo={handleSelectMemo}
-              />
-            </div>
+                {/* Timeline */}
+                <div className="flex-1 overflow-auto no-scrollbar">
+                  <MemosTimeline
+                    refreshKey={refreshKey}
+                    onSelectMemo={handleSelectMemo}
+                  />
+                </div>
+              </>
+            ) : (
+              <div className="flex-1 flex flex-col items-center justify-center gap-3 text-muted-foreground/40">
+                <LogIn className="w-10 h-10" />
+                <p className="text-sm font-medium">请先登录后再发布笔记</p>
+                <a
+                  href="/login"
+                  className="text-xs text-primary/60 hover:text-primary/80 transition-colors underline underline-offset-2"
+                >
+                  前往登录
+                </a>
+              </div>
+            )}
           </div>
         ) : (
           <div className="flex-1 p-4 flex items-center justify-center text-xs text-muted-foreground/30">

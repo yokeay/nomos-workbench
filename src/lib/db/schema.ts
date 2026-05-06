@@ -17,6 +17,8 @@ export const users = sqliteTable(`${BUSINESS_PREFIX}users`, {
   avatar: text('avatar'),
   totpSecret: text('totp_secret'),
   totpEnabled: integer('totp_enabled').default(0),
+  role: text('role').notNull().default('user'),
+  githubId: text('github_id'),
   theme: text('theme').default('dark'),
   createdAt: integer('created_at').notNull(),
   updatedAt: integer('updated_at').notNull(),

@@ -18,12 +18,18 @@ export function createDufsAdapter(config: DufsConfig): StorageAdapter {
 
       const buffer = Buffer.from(await file.arrayBuffer())
 
+      const headers: Record<string, string> = {
+        'Content-Type': file.type || 'application/octet-stream',
+      }
+      if (config.authKey) {
+        const encoded = Buffer.from(`nomos:${config.authKey}`).toString('base64')
+        headers['Authorization'] = `Basic ${encoded}`
+      }
+
       const res = await fetch(`${baseUrl}/${filename}`, {
         method: 'PUT',
         body: buffer,
-        headers: {
-          'Content-Type': file.type || 'application/octet-stream',
-        },
+        headers,
       })
 
       if (!res.ok) {

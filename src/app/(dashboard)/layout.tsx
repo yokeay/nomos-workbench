@@ -1,3 +1,4 @@
+import { AuthProvider } from '@/components/auth-provider'
 import { Header } from '@/components/layout/header';
 import { Sidebar } from '@/components/layout/sidebar';
 import { TimelinePanel } from '@/components/layout/timeline-panel';
@@ -8,23 +9,25 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
-      {/* Header */}
-      <Header />
+    <AuthProvider>
+      <div className="h-screen flex flex-col overflow-hidden">
+        {/* Header */}
+        <Header />
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Sidebar */}
-        <Sidebar />
+        {/* Main Content Area */}
+        <div className="flex-1 flex overflow-hidden">
+          {/* Sidebar */}
+          <Sidebar />
 
-        {/* Main Content */}
-        <main className="flex-1 overflow-hidden bg-background">
-          {children}
-        </main>
+          {/* Main Content */}
+          <main className="flex-1 overflow-hidden bg-background">
+            {children}
+          </main>
 
-        {/* Timeline Panel */}
-        <TimelinePanel />
+          {/* Timeline Panel */}
+          <TimelinePanel />
+        </div>
       </div>
-    </div>
+    </AuthProvider>
   );
 }

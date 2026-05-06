@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import { cn } from '@/lib/utils'
 
 interface Memo {
@@ -40,7 +42,7 @@ export function MemosTimeline({ refreshKey, onSelectMemo }: MemosTimelineProps) 
       const res = await fetch('/api/memos?limit=50')
       const json = await res.json()
       if (json.code === 0) {
-        setMemos(json.data.items || [])
+        setMemos(json.data || [])
       }
     } catch {
       // ignore
@@ -76,7 +78,6 @@ export function MemosTimeline({ refreshKey, onSelectMemo }: MemosTimelineProps) 
 
   return (
     <div className="relative pl-4 py-2">
-      {/* Timeline vertical line */}
       <div className="absolute left-0 top-0 bottom-0 w-px bg-border/40" />
 
       <div className="space-y-3">
@@ -86,13 +87,20 @@ export function MemosTimeline({ refreshKey, onSelectMemo }: MemosTimelineProps) 
             onClick={() => onSelectMemo(memo)}
             className="relative block w-full text-left group"
           >
-            {/* Timeline dot */}
             <div className="absolute -left-[calc(1rem+1.5px)] top-1.5 w-1.5 h-1.5 rounded-full bg-border group-hover:bg-foreground/40 transition-colors duration-fast" />
 
             <div className="space-y-0.5">
-              <p className="text-xs text-foreground/80 line-clamp-2 leading-relaxed">
-                {memo.content}
-              </p>
+              <div className="prose prose-xs max-w-none text-foreground/80 line-clamp-2">
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  urlTransform={(url) => {
+                    const m = url.match(/\/([a-f0-9-]{36}\.[a-z]+)$/i)
+                    return m ? `/api/storage/raw/${m[1]}` : url
+                  }}
+                >
+                  {memo.content}
+                </ReactMarkdown>
+              </div>
               <span className="text-[10px] text-muted-foreground/40">
                 {relativeTime(memo.createdAt)}
               </span>

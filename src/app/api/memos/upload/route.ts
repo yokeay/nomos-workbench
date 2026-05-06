@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@/lib/auth'
 import { getStorageAdapter } from '@/lib/storage'
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await auth()
+    if (!session?.user?.id) {
+      return NextResponse.json({ code: 1001, message: 'Unauthorized', data: null }, { status: 401 })
+    }
+
     const formData = await request.formData()
     const files = formData.getAll('files') as File[]
 

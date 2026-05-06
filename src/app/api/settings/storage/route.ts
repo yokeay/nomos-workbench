@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@/lib/auth'
 import { db, storageConfig } from '@/lib/db'
 import { eq } from 'drizzle-orm'
 
@@ -21,6 +22,9 @@ export async function GET() {
     if (config.secretKey && typeof config.secretKey === 'string' && config.secretKey.length > 0) {
       config = { ...config, secretKey: '••••' }
     }
+    if (config.authKey && typeof config.authKey === 'string' && config.authKey.length > 0) {
+      config = { ...config, authKey: '••••' }
+    }
 
     return NextResponse.json({
       code: 0,
@@ -35,6 +39,11 @@ export async function GET() {
 
 export async function PUT(request: NextRequest) {
   try {
+    const session = await auth()
+    if (!session?.user?.id) {
+      return NextResponse.json({ code: 1001, message: 'Unauthorized', data: null }, { status: 401 })
+    }
+
     const body = await request.json()
     const { provider, config } = body
 
@@ -53,6 +62,9 @@ export async function PUT(request: NextRequest) {
       try { oldConfig = JSON.parse(existing.config) } catch { /* */ }
       if (finalConfig.secretKey === '••••' && oldConfig.secretKey) {
         finalConfig.secretKey = oldConfig.secretKey
+      }
+      if (finalConfig.authKey === '••••' && oldConfig.authKey) {
+        finalConfig.authKey = oldConfig.authKey
       }
     }
 

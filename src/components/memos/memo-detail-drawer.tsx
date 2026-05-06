@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import { cn } from '@/lib/utils'
 import { X, Trash2 } from 'lucide-react'
 
@@ -102,8 +104,16 @@ export function MemoDetailDrawer({ memo, open, onClose, onDelete }: MemoDetailDr
 
           {/* Content */}
           <div className="flex-1 overflow-auto px-4 py-4">
-            <div className="text-sm text-foreground/80 whitespace-pre-wrap leading-relaxed">
-              {memo?.content || ''}
+            <div className="prose prose-sm max-w-none text-foreground/80">
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                urlTransform={(url) => {
+                  const m = url.match(/\/([a-f0-9-]{36}\.[a-z]+)$/i)
+                  return m ? `/api/storage/raw/${m[1]}` : url
+                }}
+              >
+                {memo?.content || ''}
+              </ReactMarkdown>
             </div>
           </div>
         </div>

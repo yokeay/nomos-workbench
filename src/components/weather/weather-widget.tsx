@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react"
 import { MapPin, Cloud, Loader2 } from "lucide-react"
 
+
 interface LocationData {
   city: string
   state: string
@@ -174,10 +175,10 @@ export function WeatherWidget() {
 
       {/* Popover */}
       {open && (
-        <div
-          ref={popoverRef}
-          className="absolute right-0 top-full mt-2 w-72 glass border border-border/60 shadow-lg-soft rounded-2xl p-4 z-50 animate-scale-in"
-        >
+          <div
+            ref={popoverRef}
+            className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-72 bg-popover border border-border/50 shadow-lg-soft rounded-2xl p-4 z-50 animate-scale-in"
+          >
           {/* Current weather header */}
           <div className="flex items-center justify-between mb-3">
             <div>
