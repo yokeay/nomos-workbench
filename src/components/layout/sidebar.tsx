@@ -27,6 +27,14 @@ export function Sidebar() {
     { href: '/settings', label: t('sidebar:settings'), icon: Settings },
   ];
 
+  const handleTagsClick = () => {
+    if (pathname === '/tags') {
+      router.back();
+    } else {
+      router.push('/tags');
+    }
+  };
+
   return (
     <aside className="w-16 bg-sidebar border-r border-sidebar-border flex flex-col h-full shrink-0 z-20">
       {/* Navigation */}
@@ -34,6 +42,23 @@ export function Sidebar() {
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
+          if (item.href === '/tags') {
+            return (
+              <button
+                key={item.href}
+                onClick={handleTagsClick}
+                title={item.label}
+                className={cn(
+                  'relative flex items-center justify-center h-11 rounded-xl transition-all duration-normal w-full',
+                  isActive
+                    ? 'bg-sidebar-active text-sidebar-foreground shadow-subtle'
+                    : 'text-muted-foreground/60 hover:text-sidebar-foreground/80 hover:bg-sidebar-hover'
+                )}
+              >
+                <Icon className="w-5 h-5" />
+              </button>
+            );
+          }
           return (
             <Link
               key={item.href}
