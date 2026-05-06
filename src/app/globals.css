@@ -288,7 +288,6 @@
 }
 .animate-timeline-node {
   animation: timeline-node-expand 2.7s var(--ease-out-expo) forwards;
-  overflow: hidden;
 }
 
 @keyframes dot-pop {

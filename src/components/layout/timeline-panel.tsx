@@ -172,13 +172,15 @@ function AITimeline() {
               key={i}
               className="group px-3 py-2.5 rounded-xl hover:bg-accent/40 transition-colors duration-fast animate-timeline-node"
             >
-              <div className="text-muted-foreground/70 text-[10px] font-medium mb-1 tracking-wide">
-                {date}
+              <div className="overflow-hidden">
+                <div className="text-muted-foreground/70 text-[10px] font-medium mb-1 tracking-wide">
+                  {date}
+                </div>
+                <TypewriterText
+                  text={content.message}
+                  className="text-foreground/85 text-xs leading-relaxed line-clamp-3 group-hover:text-foreground transition-colors"
+                />
               </div>
-              <TypewriterText
-                text={content.message}
-                className="text-foreground/85 text-xs leading-relaxed line-clamp-3 group-hover:text-foreground transition-colors"
-              />
             </div>
           );
         })}
@@ -418,25 +420,27 @@ function NewsTimeline() {
                     dotClass,
                   )}
                 />
-                <div className="pl-3">
-                  <TypewriterText
-                    text={item.title}
-                    className="text-xs text-foreground/85 font-medium line-clamp-2 leading-snug group-hover:text-foreground transition-colors"
-                  />
-                  {item.extra?.hover && (
-                    <div className="text-[11px] text-muted-foreground/60 mt-0.5 line-clamp-1">
-                      {item.extra.hover}
-                    </div>
-                  )}
-                  <div className="flex items-center gap-1.5 mt-1">
-                    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-muted/60 text-muted-foreground">
-                      {item.sourceName}
-                    </span>
-                    {item.pubDate && (
-                      <span className="text-[10px] text-muted-foreground/50">
-                        {relativeTime(item.pubDate)}
-                      </span>
+                <div className="overflow-hidden">
+                  <div className="pl-3">
+                    <TypewriterText
+                      text={item.title}
+                      className="text-xs text-foreground/85 font-medium line-clamp-2 leading-snug group-hover:text-foreground transition-colors"
+                    />
+                    {item.extra?.hover && (
+                      <div className="text-[11px] text-muted-foreground/60 mt-0.5 line-clamp-1">
+                        {item.extra.hover}
+                      </div>
                     )}
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-muted/60 text-muted-foreground">
+                        {item.sourceName}
+                      </span>
+                      {item.pubDate && (
+                        <span className="text-[10px] text-muted-foreground/50">
+                          {relativeTime(item.pubDate)}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </a>
