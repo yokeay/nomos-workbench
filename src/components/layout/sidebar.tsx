@@ -20,7 +20,7 @@ export function Sidebar() {
   };
 
   const navItems = [
-    { href: '/dashboard', label: '首页', icon: Globe },
+    { href: '/', label: '首页', icon: Globe },
     { href: '/tags', label: t('sidebar:tags'), icon: LayoutDashboard },
     { href: '/memos', label: t('sidebar:calendar'), icon: Calendar },
     { href: '/settings', label: t('sidebar:settings'), icon: Settings },
