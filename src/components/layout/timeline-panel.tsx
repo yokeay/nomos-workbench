@@ -23,16 +23,20 @@ function relativeTime(date: number | string): string {
   return new Date(ts).toLocaleDateString();
 }
 
-function TypewriterText({ text, speed = 75, className }: { text: string; speed?: number; className?: string }) {
-  const [chars, setChars] = useState(0);
+function TypewriterText({ text, speed = 75, instant = false, className }: { text: string; speed?: number; instant?: boolean; className?: string }) {
+  const [chars, setChars] = useState(instant ? text.length : 0);
   const textRef = useRef(text);
 
   useEffect(() => {
     if (textRef.current !== text) {
       textRef.current = text;
-      setChars(0);
+      if (instant) {
+        setChars(text.length);
+      } else {
+        setChars(0);
+      }
     }
-    if (!text) return;
+    if (!text || instant) return;
     let i = 0;
     const timer = setInterval(() => {
       i++;
@@ -40,7 +44,7 @@ function TypewriterText({ text, speed = 75, className }: { text: string; speed?:
       if (i >= text.length) clearInterval(timer);
     }, speed);
     return () => clearInterval(timer);
-  }, [text, speed]);
+  }, [text, speed, instant]);
 
   return <span className={className}>{text.slice(0, chars)}</span>;
 }
@@ -189,6 +193,8 @@ function AITimeline() {
   );
 }
 
+const LS_KEY = 'nomos_news_state';
+
 function NewsTimeline() {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
@@ -206,8 +212,45 @@ function NewsTimeline() {
   const revealIndexRef = useRef(0);
   // Track seen item keys to avoid duplicates
   const seenRef = useRef<Set<string>>(new Set());
+  // Keys of already-revealed items (restored from localStorage, shown without typewriter)
+  const revealedKeysRef = useRef<Set<string>>(new Set());
+  // Whether we restored from localStorage (skip typewriter for first batch)
+  const restoredRef = useRef(false);
 
   const itemKey = (item: any) => `${item.sourceId}-${item.id}`;
+
+  // Save state to localStorage — compute revealed keys from current index
+  const saveState = useCallback(() => {
+    try {
+      const all = allItemsRef.current;
+      const idx = revealIndexRef.current;
+      const keys: string[] = [];
+      for (let i = 0; i < idx; i++) {
+        const item = all[all.length - 1 - i];
+        if (item) keys.push(itemKey(item));
+      }
+      localStorage.setItem(LS_KEY, JSON.stringify({
+        revealIndex: idx,
+        revealedKeys: keys,
+        t: Date.now(),
+      }));
+    } catch { /* quota exceeded, ignore */ }
+  }, []);
+
+  // Restore state from localStorage
+  const restoreState = useCallback((): { revealIndex: number; revealedKeys: string[] } | null => {
+    try {
+      const raw = localStorage.getItem(LS_KEY);
+      if (!raw) return null;
+      const data = JSON.parse(raw);
+      // Expire after 24 hours
+      if (Date.now() - data.t > 24 * 3600_000) {
+        localStorage.removeItem(LS_KEY);
+        return null;
+      }
+      return data;
+    } catch { return null; }
+  }, []);
 
   const sortDesc = (items: any[]) =>
     [...items].sort((a, b) => {
@@ -220,12 +263,11 @@ function NewsTimeline() {
     });
 
   // Reveal next oldest item (from end of allItems)
-  const revealNext = useCallback(() => {
+  const revealNext = useCallback((instant = false) => {
     const all = allItemsRef.current;
     const idx = revealIndexRef.current;
 
     if (idx >= all.length) {
-      // All revealed, stop timer
       if (revealTimerRef.current) {
         clearInterval(revealTimerRef.current);
         revealTimerRef.current = null;
@@ -233,15 +275,19 @@ function NewsTimeline() {
       return;
     }
 
-    // Reveal one item: prepend to displayItems (the item being revealed is older than what's already shown)
+    // Reveal one item: prepend to displayItems
     const item = all[all.length - 1 - idx];
     revealIndexRef.current = idx + 1;
 
+    const key = itemKey(item);
+
     setDisplayItems(prev => {
-      const key = itemKey(item);
       if (prev.some(p => itemKey(p) === key)) return prev;
       return [item, ...prev];
     });
+
+    // Persist after each reveal
+    saveState();
 
     if (revealIndexRef.current >= all.length) {
       if (revealTimerRef.current) {
@@ -249,11 +295,15 @@ function NewsTimeline() {
         revealTimerRef.current = null;
       }
     }
-  }, []);
+  }, [saveState]);
+
+  // Reveal one item with typewriter, then save
+  const revealNextAnimated = useCallback(() => {
+    revealNext(false);
+  }, [revealNext]);
 
   // Start reveal animation
   const startReveal = useCallback(() => {
-    // Clear any existing reveal timer
     if (revealTimerRef.current) {
       clearInterval(revealTimerRef.current);
     }
@@ -261,11 +311,42 @@ function NewsTimeline() {
     const all = allItemsRef.current;
     if (all.length === 0) return;
 
-    // If we have many items cached, reveal them staggered
-    revealTimerRef.current = setInterval(revealNext, 6000);
-    // Immediately reveal first (oldest) item
-    revealNext();
-  }, [revealNext]);
+    revealTimerRef.current = setInterval(revealNextAnimated, 6000);
+    revealNextAnimated();
+  }, [revealNextAnimated]);
+
+  // Restore previously-revealed items immediately (no typewriter)
+  const restoreRevealed = useCallback(() => {
+    const saved = restoreState();
+    if (!saved || saved.revealIndex <= 0) return false;
+
+    const all = allItemsRef.current;
+    if (all.length === 0) return false;
+
+    restoredRef.current = true;
+    revealedKeysRef.current = new Set(saved.revealedKeys);
+
+    // Restore reveal index, clamp to current data size
+    const idx = Math.min(saved.revealIndex, all.length);
+    revealIndexRef.current = idx;
+
+    // Show already-revealed items instantly (prepend from oldest to newest)
+    const toShow: any[] = [];
+    for (let i = 0; i < idx; i++) {
+      const item = all[all.length - 1 - i];
+      if (item) toShow.push(item);
+    }
+    setDisplayItems(toShow);
+    setLoading(false);
+
+    // Continue animated reveal for remaining items
+    if (idx < all.length) {
+      if (revealTimerRef.current) clearInterval(revealTimerRef.current);
+      revealTimerRef.current = setInterval(revealNextAnimated, 6000);
+    }
+
+    return true;
+  }, [restoreState, revealNextAnimated]);
 
   // Add new items to cache (from SSE or polling) — prepend to top, don't clear existing
   const addToCache = useCallback((incoming: any[]) => {
@@ -278,11 +359,9 @@ function NewsTimeline() {
 
     if (novel.length === 0) return;
 
-    const merged = sortDesc([...allItemsRef.current, ...novel]);
-    allItemsRef.current = merged;
+    allItemsRef.current = sortDesc([...allItemsRef.current, ...novel]);
 
-    // Prepend novel items at top (they're newer than existing displayItems)
-    // Don't reset reveal — keep revealing older items from bottom
+    // Prepend novel items at top — revealIndex counts from end, stays unchanged
     setDisplayItems((prev) => {
       const novelSorted = sortDesc(novel);
       const existingKeys = new Set(prev.map(p => itemKey(p)));
@@ -290,26 +369,27 @@ function NewsTimeline() {
       return [...trulyNew, ...prev];
     });
 
-    // revealIndexRef stays unchanged — novel items insert at top, end positions don't shift
-  }, []);
+    // Persist updated state
+    saveState();
+  }, [saveState]);
 
   // Set initial cache
   const setInitialCache = useCallback((items: any[]) => {
     for (const item of items) {
       seenRef.current.add(itemKey(item));
     }
-    const sorted = sortDesc(items);
-    allItemsRef.current = sorted;
-    revealIndexRef.current = 0;
-    setDisplayItems([]);
-    setLoading(false);
+    allItemsRef.current = sortDesc(items);
 
-    if (revealTimerRef.current) {
-      clearInterval(revealTimerRef.current);
+    // Try to restore from localStorage
+    const restored = restoreRevealed();
+    if (!restored) {
+      // No saved state — fresh start
+      revealIndexRef.current = 0;
+      setDisplayItems([]);
+      setLoading(false);
+      startReveal();
     }
-    revealTimerRef.current = setInterval(revealNext, 6000);
-    revealNext();
-  }, [revealNext]);
+  }, [restoreRevealed, startReveal]);
 
   // Fallback: REST polling
   const fetchFallback = useCallback(async (isRefresh = false) => {
@@ -423,6 +503,7 @@ function NewsTimeline() {
                   <div className="pl-3">
                     <TypewriterText
                       text={item.title}
+                      instant={revealedKeysRef.current.has(itemKey(item))}
                       className="text-xs text-foreground/85 font-medium line-clamp-2 leading-snug group-hover:text-foreground transition-colors"
                     />
                     {item.extra?.hover && (
