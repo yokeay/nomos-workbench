@@ -11,9 +11,9 @@ interface TabBarProps {
 }
 
 const TABS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
-  { key: 'notes', label: '笔记', icon: <FileText className="w-3 h-3" /> },
-  { key: 'history', label: '历史上的今天', icon: <Clock className="w-3 h-3" /> },
-  { key: 'almanac', label: '万年历', icon: <Moon className="w-3 h-3" /> },
+  { key: 'notes', label: '笔记', icon: <FileText className="w-3.5 h-3.5" /> },
+  { key: 'history', label: '历史上的今天', icon: <Clock className="w-3.5 h-3.5" /> },
+  { key: 'almanac', label: '万年历', icon: <Moon className="w-3.5 h-3.5" /> },
 ]
 
 export function TabBar({ activeTab, onTabChange }: TabBarProps) {
@@ -24,7 +24,7 @@ export function TabBar({ activeTab, onTabChange }: TabBarProps) {
           key={tab.key}
           onClick={() => onTabChange(tab.key)}
           className={cn(
-            'flex-1 flex items-center justify-center gap-1 px-2 py-2 text-xs font-medium transition-colors duration-fast',
+            'flex-1 flex items-center justify-center gap-0.5 px-1 py-2 text-xs font-medium transition-colors duration-fast whitespace-nowrap',
             'border-b-2 -mb-px',
             activeTab === tab.key
               ? 'border-foreground text-foreground'
