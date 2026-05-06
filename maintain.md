@@ -1,5 +1,27 @@
 # NOMOS Workbench - 版本迭代记录
 
+## v0.1.6 - 2026-05-06
+
+### 变更内容
+- **天气组件**：Header 右侧新增 WeatherWidget，展示地理位置（城市名） + 当前天气温度 + 天气图标
+- **天气弹窗**：点击天气组件弹出 7 天预报卡片（当天 + 6 天），含天气图标、温度范围、降水量
+- **天气数据**：通过 MSN Location API 获取 IP 定位，MSN Weather API 获取天气（Next.js API Route 代理，10min ISR 缓存）
+- **日期时间重构**：改为双行结构 —— 上排"2026年5月6日"，下排"周四 14:30:25"（每秒实时刷新）
+- **搜索框加宽**：默认宽度 w-48，激活宽度 w-80
+
+### 新增文件
+- `src/components/weather/weather-widget.tsx` — 天气组件（定位获取 + 天气展示 + 7天弹窗）
+- `src/app/api/weather/route.ts` — 天气 API 代理端点
+
+### 修改文件
+- `src/components/layout/header.tsx` — 日期时间重构 + 天气组件集成 + 搜索框加宽
+
+### 影响范围
+- Header 右侧区域布局变更
+- 新增 /api/weather 端点
+
+---
+
 ## v0.1.5 - 2026-05-06
 
 ### 变更内容

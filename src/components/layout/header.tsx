@@ -12,27 +12,36 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { WeatherWidget } from '@/components/weather/weather-widget';
 import { Search, Command, Sun, Moon, Languages, User, LogOut } from 'lucide-react';
 
 export function Header() {
   const { t } = useTranslation();
   const { theme, toggleTheme, locale, setLocale } = useSettingsStore();
-  const [currentDate, setCurrentDate] = useState('');
+  const [dateTop, setDateTop] = useState('');
+  const [dateBottom, setDateBottom] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const fmt = () =>
-      new Date().toLocaleDateString(locale === 'zh' ? 'zh-CN' : 'en-US', {
-        weekday: 'short',
-        month: 'short',
-        day: 'numeric',
-      });
+    const fmt = () => {
+      const now = new Date();
+      const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+      const y = now.getFullYear();
+      const m = now.getMonth() + 1;
+      const d = now.getDate();
+      const w = weekdays[now.getDay()];
+      const hh = String(now.getHours()).padStart(2, '0');
+      const mm = String(now.getMinutes()).padStart(2, '0');
+      const ss = String(now.getSeconds()).padStart(2, '0');
+      setDateTop(`${y}年${m}月${d}日`);
+      setDateBottom(`${w} ${hh}:${mm}:${ss}`);
+    };
 
-    setCurrentDate(fmt());
-    const timer = setInterval(() => setCurrentDate(fmt()), 3600000);
+    fmt();
+    const timer = setInterval(fmt, 1000);
     return () => clearInterval(timer);
-  }, [locale]);
+  }, []);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -63,7 +72,7 @@ export function Header() {
             ref={searchRef}
             type="search"
             placeholder={t('header:search')}
-            className="w-40 h-8 pl-8 pr-8 bg-muted/60 border border-transparent text-sm text-foreground placeholder:text-muted-foreground/40 rounded-lg transition-all duration-normal focus:outline-none focus:bg-input-background focus:border-border focus:ring-1 focus:ring-ring/20 focus:w-56"
+            className="w-48 h-8 pl-8 pr-8 bg-muted/60 border border-transparent text-sm text-foreground placeholder:text-muted-foreground/40 rounded-lg transition-all duration-normal focus:outline-none focus:bg-input-background focus:border-border focus:ring-1 focus:ring-ring/20 focus:w-80"
             onFocus={() => setSearchFocused(true)}
             onBlur={() => setSearchFocused(false)}
           />
@@ -78,10 +87,19 @@ export function Header() {
       <div className="flex-1" />
 
       {/* Right section */}
-      <div className="flex items-center gap-5 flex-shrink-0">
-        <span className="text-muted-foreground/70 text-xs font-medium tracking-wide select-none">
-          {currentDate}
-        </span>
+      <div className="flex items-center gap-4 flex-shrink-0">
+        {/* Date + Time */}
+        <div className="flex flex-col items-end select-none leading-tight">
+          <span className="text-foreground/80 text-[11px] font-medium tracking-wide tabular-nums">
+            {dateTop}
+          </span>
+          <span className="text-muted-foreground/50 text-[10px] tabular-nums">
+            {dateBottom}
+          </span>
+        </div>
+
+        {/* Weather + Location */}
+        <WeatherWidget />
 
         <DropdownMenu>
           <DropdownMenuTrigger className="focus:outline-none group">
