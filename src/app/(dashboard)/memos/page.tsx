@@ -52,7 +52,7 @@ export default function MemosPage() {
   return (
     <div className="flex h-full">
       {/* Left panel */}
-      <div className="w-[264px] shrink-0 border-r border-border/40 flex flex-col p-3 gap-3">
+      <div className="w-[304px] shrink-0 border-r border-border/40 flex flex-col p-3 gap-3">
         {/* Small calendar at top */}
         <SmallCalendar />
 
