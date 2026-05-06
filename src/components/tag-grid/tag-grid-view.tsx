@@ -74,10 +74,17 @@ function PaginatedGrid({ tags }: PaginatedGridProps) {
   const handleWheel = useCallback(
     (e: React.WheelEvent) => {
       if (totalPages <= 1) return
-      // Horizontal scroll (trackpad) or shift+vertical -> page nav
-      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
-        if (e.deltaX > 30) goNext()
-        else if (e.deltaX < -30) goPrev()
+      e.preventDefault()
+      // Trackpad horizontal swipe
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY) && Math.abs(e.deltaX) > 10) {
+        if (e.deltaX > 0) goNext()
+        else goPrev()
+        return
+      }
+      // Mouse wheel vertical scroll
+      if (Math.abs(e.deltaY) > 10) {
+        if (e.deltaY > 0) goNext()
+        else goPrev()
       }
     },
     [totalPages, goNext, goPrev]

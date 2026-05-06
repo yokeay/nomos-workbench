@@ -1,8 +1,6 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { useTerminalStore } from '@/stores';
@@ -27,11 +25,11 @@ export function Sidebar() {
     { href: '/settings', label: t('sidebar:settings'), icon: Settings },
   ];
 
-  const handleTagsClick = () => {
-    if (pathname === '/tags') {
+  const handleNavClick = (href: string) => {
+    if (pathname === href) {
       router.back();
     } else {
-      router.push('/tags');
+      router.push(href);
     }
   };
 
@@ -42,37 +40,20 @@ export function Sidebar() {
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
-          if (item.href === '/tags') {
-            return (
-              <button
-                key={item.href}
-                onClick={handleTagsClick}
-                title={item.label}
-                className={cn(
-                  'relative flex items-center justify-center h-11 rounded-xl transition-all duration-normal w-full',
-                  isActive
-                    ? 'bg-sidebar-active text-sidebar-foreground shadow-subtle'
-                    : 'text-muted-foreground/60 hover:text-sidebar-foreground/80 hover:bg-sidebar-hover'
-                )}
-              >
-                <Icon className="w-5 h-5" />
-              </button>
-            );
-          }
           return (
-            <Link
+            <button
               key={item.href}
-              href={item.href}
+              onClick={() => handleNavClick(item.href)}
               title={item.label}
               className={cn(
-                'relative flex items-center justify-center h-11 rounded-xl transition-all duration-normal',
+                'relative flex items-center justify-center h-11 rounded-xl transition-all duration-normal w-full',
                 isActive
                   ? 'bg-sidebar-active text-sidebar-foreground shadow-subtle'
                   : 'text-muted-foreground/60 hover:text-sidebar-foreground/80 hover:bg-sidebar-hover'
               )}
             >
               <Icon className="w-5 h-5" />
-            </Link>
+            </button>
           );
         })}
 

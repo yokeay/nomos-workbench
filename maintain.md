@@ -1,5 +1,27 @@
 # NOMOS Workbench - 版本迭代记录
 
+## v0.1.9 - 2026-05-06
+
+### 变更内容
+- **鼠标滚轮翻页修复**：handleWheel 新增 deltaY 处理，普通鼠标滚轮上下滚动可正常翻页
+- **侧边栏按钮统一切换**：所有导航按钮（标签网格/日历/设置）统一为 toggle 行为，首次点击进入视图，已在视图时再次点击返回上一页
+- **骨架屏加载状态**：为 /tags、/calendar、/settings 路由添加 loading.tsx 骨架屏，路由切换时展示加载占位
+
+### 修改文件
+- `src/components/tag-grid/tag-grid-view.tsx` — handleWheel 新增 deltaY 处理 + e.preventDefault()
+- `src/components/layout/sidebar.tsx` — 统一所有导航按钮为切换行为，移除 Link 导入
+
+### 新增文件
+- `src/app/(dashboard)/tags/loading.tsx` — 标签网格骨架屏
+- `src/app/(dashboard)/calendar/loading.tsx` — 日历骨架屏
+- `src/app/(dashboard)/settings/loading.tsx` — 设置骨架屏
+
+### 影响范围
+- 侧边栏所有按钮行为变更为 toggle，点击已在的视图会返回上一页
+- 路由切换时展示骨架屏加载状态，提升感知性能
+
+---
+
 ## v0.1.8 - 2026-05-06
 
 ### 变更内容
