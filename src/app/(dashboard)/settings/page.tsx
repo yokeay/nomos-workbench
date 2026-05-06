@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { User, Palette, Globe, Key, HardDrive, Save, Server, LogIn } from 'lucide-react';
+import { User, Palette, Globe, Key, HardDrive, Save, Server, Terminal as TerminalIcon, LogIn } from 'lucide-react';
 
 export default function SettingsPage() {
   const { t } = useTranslation();
@@ -46,7 +46,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="h-full p-6 overflow-auto">
+    <div className="h-full p-6 overflow-auto no-scrollbar">
       <div className="max-w-2xl mx-auto space-y-5 animate-fade-in">
         {/* Header */}
         <div className="flex items-center gap-3 mb-2">
@@ -184,6 +184,19 @@ export default function SettingsPage() {
           </CardHeader>
           <CardContent>
             <StorageManager />
+          </CardContent>
+        </Card>
+
+        {/* Terminal */}
+        <Card className="bg-card/60 border-border/60 shadow-sm-soft rounded-2xl">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base font-semibold flex items-center gap-2">
+              <TerminalIcon className="w-4 h-4 text-foreground/50" />
+              {t('settings:terminal')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <TerminalManager />
           </CardContent>
         </Card>
 
@@ -527,6 +540,56 @@ function StorageManager() {
         className="rounded-xl h-9 px-4 text-sm font-medium transition-all duration-normal"
       >
         {saving ? t('settings:saving') : t('settings:save')}
+      </Button>
+    </div>
+  );
+}
+
+function TerminalManager() {
+  const { t } = useTranslation();
+  const { isLoggedIn } = useAuth();
+  const [wsUrl, setWsUrl] = useState('');
+  const [initialized, setInitialized] = useState(false);
+  const toast = useToast();
+
+  useEffect(() => {
+    const stored = localStorage.getItem('nomos_terminal_ws_url');
+    if (stored) setWsUrl(stored);
+    setInitialized(true);
+  }, []);
+
+  const handleSave = () => {
+    localStorage.setItem('nomos_terminal_ws_url', wsUrl.trim() || '');
+    toast.success(t('common:success') as string);
+  };
+
+  if (!initialized) return null;
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <label className="text-xs font-medium text-muted-foreground block mb-1.5">{t('settings:terminalWsUrl')}</label>
+        <Input
+          value={wsUrl}
+          onChange={(e) => setWsUrl(e.target.value)}
+          disabled={!isLoggedIn}
+          placeholder="ws://192.168.1.100:8080"
+          className="h-9 bg-muted/50 border-border/60 rounded-xl text-sm"
+        />
+        <p className="text-[10px] text-muted-foreground/40 mt-1">{t('settings:terminalWsUrlDesc')}</p>
+      </div>
+      {!isLoggedIn && (
+        <p className="text-[10px] text-muted-foreground/40 flex items-center gap-1">
+          <LogIn className="w-3 h-3" />
+          请先登录后配置终端
+        </p>
+      )}
+      <Button
+        onClick={handleSave}
+        disabled={!isLoggedIn}
+        className="rounded-xl h-9 px-4 text-sm font-medium transition-all duration-normal"
+      >
+        {t('settings:save')}
       </Button>
     </div>
   );

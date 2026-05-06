@@ -63,7 +63,8 @@ export function TerminalCard() {
       }
     });
 
-    const wsUrl = process.env.NEXT_PUBLIC_TERMINAL_WS_URL || 'ws://localhost:8080';
+    const stored = typeof window !== 'undefined' ? localStorage.getItem('nomos_terminal_ws_url') : null;
+    const wsUrl = stored || process.env.NEXT_PUBLIC_TERMINAL_WS_URL || 'ws://localhost:8080';
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 

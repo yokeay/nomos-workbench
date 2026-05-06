@@ -125,6 +125,9 @@ export const TRANSLATIONS = {
       storageServerUrlDesc: 'DUFS 文件服务器地址，例如 http://192.168.1.100:5000',
       storageDufsAuthKey: '认证密钥',
       storageDufsAuthKeyDesc: 'DUFS 服务端的访问密码',
+      terminal: '终端',
+      terminalWsUrl: 'WebSocket 地址',
+      terminalWsUrlDesc: 'gotty 终端服务的 WebSocket 连接地址',
     },
     models: {
       claude35sonnet: 'Claude 3.5 Sonnet',
@@ -261,6 +264,9 @@ export const TRANSLATIONS = {
       storageServerUrlDesc: 'DUFS server address, e.g. http://192.168.1.100:5000',
       storageDufsAuthKey: 'Auth Key',
       storageDufsAuthKeyDesc: 'DUFS server access password',
+      terminal: 'Terminal',
+      terminalWsUrl: 'WebSocket URL',
+      terminalWsUrlDesc: 'WebSocket URL of the gotty terminal server',
     },
     models: {
       claude35sonnet: 'Claude 3.5 Sonnet',
