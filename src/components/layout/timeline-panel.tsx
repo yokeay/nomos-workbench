@@ -23,6 +23,28 @@ function relativeTime(date: number | string): string {
   return new Date(ts).toLocaleDateString();
 }
 
+function TypewriterText({ text, speed = 25, className }: { text: string; speed?: number; className?: string }) {
+  const [chars, setChars] = useState(0);
+  const textRef = useRef(text);
+
+  useEffect(() => {
+    if (textRef.current !== text) {
+      textRef.current = text;
+      setChars(0);
+    }
+    if (!text) return;
+    let i = 0;
+    const timer = setInterval(() => {
+      i++;
+      setChars(i);
+      if (i >= text.length) clearInterval(timer);
+    }, speed);
+    return () => clearInterval(timer);
+  }, [text, speed]);
+
+  return <span className={className}>{text.slice(0, chars)}</span>;
+}
+
 const sourceColorMap: Record<string, string> = {
   red: 'bg-red-500',
   blue: 'bg-blue-500',
@@ -75,7 +97,12 @@ export function TimelinePanel() {
       </div>
 
       <div className="flex-1 overflow-hidden">
-        {activeChannel === 'ai' ? <AITimeline /> : <NewsTimeline />}
+        <div className={activeChannel === 'ai' ? '' : 'hidden'}>
+          <AITimeline />
+        </div>
+        <div className={activeChannel === 'news' ? '' : 'hidden'}>
+          <NewsTimeline />
+        </div>
       </div>
     </aside>
   );
@@ -85,8 +112,12 @@ function AITimeline() {
   const { t } = useTranslation();
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const loadedRef = useRef(false);
 
   useEffect(() => {
+    if (loadedRef.current) return;
+    loadedRef.current = true;
+
     fetch('/api/timeline/ai')
       .then((r) => r.json())
       .then((d) => {
@@ -94,6 +125,27 @@ function AITimeline() {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
+  }, []);
+
+  // Poll for new events every 60s
+  useEffect(() => {
+    const timer = setInterval(async () => {
+      try {
+        const r = await fetch('/api/timeline/ai');
+        const d = await r.json();
+        if (d.code === 0 && d.data?.length > 0) {
+          setEvents((prev) => {
+            const existing = new Set(prev.map((e: any) => e.id || e.eventDate));
+            const novel = d.data.filter((e: any) => !existing.has(e.id || e.eventDate));
+            if (novel.length === 0) return prev;
+            return [...novel, ...prev].slice(0, 50);
+          });
+        }
+      } catch {
+        // silent
+      }
+    }, 60_000);
+    return () => clearInterval(timer);
   }, []);
 
   if (loading) return <TimelineSkeleton />;
@@ -118,14 +170,15 @@ function AITimeline() {
           return (
             <div
               key={i}
-              className="group px-3 py-2.5 rounded-xl hover:bg-accent/40 transition-colors duration-fast"
+              className="group px-3 py-2.5 rounded-xl hover:bg-accent/40 transition-colors duration-fast animate-timeline-node"
             >
               <div className="text-muted-foreground/70 text-[10px] font-medium mb-1 tracking-wide">
                 {date}
               </div>
-              <div className="text-foreground/85 text-xs leading-relaxed line-clamp-3 group-hover:text-foreground transition-colors">
-                {content.message}
-              </div>
+              <TypewriterText
+                text={content.message}
+                className="text-foreground/85 text-xs leading-relaxed line-clamp-3 group-hover:text-foreground transition-colors"
+              />
             </div>
           );
         })}
@@ -355,18 +408,19 @@ function NewsTimeline() {
                 href={item.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="relative block pb-3 last:pb-0 group animate-timeline-enter"
+                className="relative block pb-3 last:pb-0 group animate-timeline-node"
               >
                 <span
                   className={cn(
-                    'absolute left-[-13px] top-1.5 w-2.5 h-2.5 rounded-full border-2 border-background ring-1 ring-border/40',
+                    'absolute left-[-13px] top-1.5 w-2.5 h-2.5 rounded-full border-2 border-background ring-1 ring-border/40 animate-dot-pop',
                     dotClass,
                   )}
                 />
                 <div className="pl-3">
-                  <div className="text-xs text-foreground/85 font-medium line-clamp-2 leading-snug group-hover:text-foreground transition-colors">
-                    {item.title}
-                  </div>
+                  <TypewriterText
+                    text={item.title}
+                    className="text-xs text-foreground/85 font-medium line-clamp-2 leading-snug group-hover:text-foreground transition-colors"
+                  />
                   {item.extra?.hover && (
                     <div className="text-[11px] text-muted-foreground/60 mt-0.5 line-clamp-1">
                       {item.extra.hover}
