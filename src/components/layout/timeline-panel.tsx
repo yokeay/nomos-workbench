@@ -48,17 +48,24 @@ export function TimelinePanel() {
           onValueChange={(v) => setActiveChannel(v as 'ai' | 'news')}
           className="w-full"
         >
-          <TabsList className="w-full bg-muted/50 h-9 rounded-xl p-0.5">
+          <TabsList className="relative w-full bg-muted/50 h-9 rounded-xl p-0.5">
+            {/* Sliding indicator */}
+            <div
+              className={cn(
+                'absolute top-0.5 h-[calc(100%-4px)] w-[calc(50%-2px)] rounded-lg bg-background shadow-subtle transition-all duration-300 ease-out',
+                activeChannel === 'ai' ? 'left-0.5' : 'left-[calc(50%+1px)]',
+              )}
+            />
             <TabsTrigger
               value="ai"
-              className="flex-1 gap-1.5 rounded-lg text-xs font-medium text-muted-foreground/60 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-subtle transition-all duration-normal"
+              className="relative z-10 flex-1 gap-1.5 rounded-lg text-xs font-medium data-active:text-foreground data-active:shadow-none data-active:bg-transparent transition-all duration-normal"
             >
               <Bot className="w-3.5 h-3.5" />
               {t('timeline:ai')}
             </TabsTrigger>
             <TabsTrigger
               value="news"
-              className="flex-1 gap-1.5 rounded-lg text-xs font-medium text-muted-foreground/60 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-subtle transition-all duration-normal"
+              className="relative z-10 flex-1 gap-1.5 rounded-lg text-xs font-medium data-active:text-foreground data-active:shadow-none data-active:bg-transparent transition-all duration-normal"
             >
               <Newspaper className="w-3.5 h-3.5" />
               {t('timeline:news')}
@@ -129,41 +136,124 @@ function AITimeline() {
 
 function NewsTimeline() {
   const { t } = useTranslation();
-  const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [mode, setMode] = useState<'sse' | 'fallback'>('sse');
   const [updatedAt, setUpdatedAt] = useState<number>(0);
   const esRef = useRef<EventSource | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const revealTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Per-source top 5 merge helper
-  const mergeItems = useCallback((incoming: any[], prev: any[]) => {
-    const existing = new Set(prev.map(i => `${i.sourceId}-${i.id}`));
-    const novel = incoming.filter((i: any) => !existing.has(`${i.sourceId}-${i.id}`));
-    if (novel.length === 0) return prev;
+  // Full data cache (sorted descending by pubDate, newest first)
+  const allItemsRef = useRef<any[]>([]);
+  // Items currently visible
+  const [displayItems, setDisplayItems] = useState<any[]>([]);
+  // Next index to reveal (counting from end: oldest first)
+  const revealIndexRef = useRef(0);
+  // Track seen item keys to avoid duplicates
+  const seenRef = useRef<Set<string>>(new Set());
 
-    const sourceLatest: Record<string, any[]> = {};
-    for (const item of [...novel, ...prev]) {
-      if (!sourceLatest[item.sourceId]) sourceLatest[item.sourceId] = [];
-      sourceLatest[item.sourceId].push(item);
-    }
-    const merged: any[] = [];
-    for (const [, srcItems] of Object.entries(sourceLatest)) {
-      srcItems.sort((a, b) => {
-        const da = a.pubDate ?? 0;
-        const db = b.pubDate ?? 0;
-        return (db as number) - (da as number) || 0;
-      });
-      merged.push(...srcItems.slice(0, 5));
-    }
-    merged.sort((a, b) => {
+  const itemKey = (item: any) => `${item.sourceId}-${item.id}`;
+
+  const sortDesc = (items: any[]) =>
+    [...items].sort((a, b) => {
       const da = a.pubDate ?? 0;
       const db = b.pubDate ?? 0;
       return (db as number) - (da as number) || 0;
     });
-    return merged;
+
+  // Reveal next oldest item (from end of allItems)
+  const revealNext = useCallback(() => {
+    const all = allItemsRef.current;
+    const idx = revealIndexRef.current;
+
+    if (idx >= all.length) {
+      // All revealed, stop timer
+      if (revealTimerRef.current) {
+        clearInterval(revealTimerRef.current);
+        revealTimerRef.current = null;
+      }
+      return;
+    }
+
+    // Reveal one item: prepend to displayItems (the item being revealed is older than what's already shown)
+    const item = all[all.length - 1 - idx];
+    revealIndexRef.current = idx + 1;
+
+    setDisplayItems(prev => {
+      const next = [item, ...prev];
+      // 300-item FIFO cap: drop oldest from bottom
+      if (next.length > 300) {
+        next.length = 300;
+      }
+      return next;
+    });
+
+    if (revealIndexRef.current >= all.length) {
+      if (revealTimerRef.current) {
+        clearInterval(revealTimerRef.current);
+        revealTimerRef.current = null;
+      }
+    }
   }, []);
+
+  // Start reveal animation
+  const startReveal = useCallback(() => {
+    // Clear any existing reveal timer
+    if (revealTimerRef.current) {
+      clearInterval(revealTimerRef.current);
+    }
+
+    const all = allItemsRef.current;
+    if (all.length === 0) return;
+
+    // If we have many items cached, reveal them staggered
+    revealTimerRef.current = setInterval(revealNext, 2000);
+    // Immediately reveal first (oldest) item
+    revealNext();
+  }, [revealNext]);
+
+  // Add new items to cache (from SSE or polling)
+  const addToCache = useCallback((incoming: any[]) => {
+    const novel = incoming.filter((item: any) => {
+      const key = itemKey(item);
+      if (seenRef.current.has(key)) return false;
+      seenRef.current.add(key);
+      return true;
+    });
+
+    if (novel.length === 0) return;
+
+    const merged = sortDesc([...allItemsRef.current, ...novel]);
+    allItemsRef.current = merged;
+
+    // Reset reveal and restart
+    revealIndexRef.current = 0;
+    setDisplayItems([]);
+
+    if (revealTimerRef.current) {
+      clearInterval(revealTimerRef.current);
+    }
+    revealTimerRef.current = setInterval(revealNext, 2000);
+    revealNext();
+  }, [revealNext]);
+
+  // Set initial cache
+  const setInitialCache = useCallback((items: any[]) => {
+    for (const item of items) {
+      seenRef.current.add(itemKey(item));
+    }
+    const sorted = sortDesc(items);
+    allItemsRef.current = sorted;
+    revealIndexRef.current = 0;
+    setDisplayItems([]);
+    setLoading(false);
+
+    if (revealTimerRef.current) {
+      clearInterval(revealTimerRef.current);
+    }
+    revealTimerRef.current = setInterval(revealNext, 2000);
+    revealNext();
+  }, [revealNext]);
 
   // Fallback: REST polling
   const fetchFallback = useCallback(async (isRefresh = false) => {
@@ -175,9 +265,9 @@ function NewsTimeline() {
       const d = await r.json();
       if (d.code === 0) {
         if (isRefresh && d.data.items.length > 0) {
-          setItems(prev => mergeItems(d.data.items, prev));
+          addToCache(d.data.items);
         } else if (!isRefresh) {
-          setItems(d.data.items);
+          setInitialCache(d.data.items);
         }
         setUpdatedAt(d.data.updatedAt);
       }
@@ -186,9 +276,9 @@ function NewsTimeline() {
     } finally {
       setLoading(false);
     }
-  }, [updatedAt, mergeItems]);
+  }, [updatedAt, addToCache, setInitialCache]);
 
-  // Connect SSE (runs once on mount)
+  // Connect SSE
   const connectSSE = useCallback(() => {
     const es = new EventSource('/api/news/stream');
     esRef.current = es;
@@ -205,13 +295,13 @@ function NewsTimeline() {
       try {
         const payload = JSON.parse(event.data);
         if (payload.items?.length > 0) {
-          setItems(prev => prev.length === 0 ? payload.items : mergeItems(payload.items, prev));
+          addToCache(payload.items);
+          setLoading(false);
         }
         if (payload.init && payload.items.length === 0) {
           fetchFallback();
         }
         if (payload.updatedAt) setUpdatedAt(payload.updatedAt);
-        setLoading(false);
       } catch {
         // invalid payload
       }
@@ -226,7 +316,7 @@ function NewsTimeline() {
         timerRef.current = setInterval(() => fetchFallback(true), 30_000);
       }
     };
-  }, [fetchFallback, mergeItems]);
+  }, [fetchFallback, addToCache]);
 
   // On mount: try SSE first
   useEffect(() => {
@@ -234,13 +324,14 @@ function NewsTimeline() {
     return () => {
       if (esRef.current) esRef.current.close();
       if (timerRef.current) clearInterval(timerRef.current);
+      if (revealTimerRef.current) clearInterval(revealTimerRef.current);
     };
   }, []);
 
   if (loading) return <TimelineSkeleton />;
 
   return (
-    <div ref={scrollRef} className="h-full overflow-y-auto overscroll-contain">
+    <div className="h-full overflow-y-auto overscroll-contain">
       {mode === 'fallback' && (
         <div className="sticky top-0 z-10 h-6 bg-amber-500/10 border-b border-amber-500/20 flex items-center justify-center gap-1.5 text-[10px] text-amber-600/80 font-medium backdrop-blur-sm">
           <Loader2 className="w-3 h-3 animate-spin" />
@@ -248,14 +339,14 @@ function NewsTimeline() {
         </div>
       )}
       <div className="px-2 py-3">
-        {items.length === 0 && (
+        {displayItems.length === 0 && allItemsRef.current.length === 0 && (
           <div className="text-muted-foreground text-xs text-center py-12 font-medium">
             {t('timeline:newsPlaceholder')}
           </div>
         )}
         <div className="relative pl-5">
           <div className="absolute left-[7px] top-1 bottom-1 w-px bg-border/60" />
-          {items.map((item: any, idx: number) => {
+          {displayItems.map((item: any, idx: number) => {
             const color = item.sourceColor || 'gray';
             const dotClass = sourceColorMap[color] || 'bg-gray-500';
             return (
@@ -264,7 +355,7 @@ function NewsTimeline() {
                 href={item.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="relative block pb-3 last:pb-0 group"
+                className="relative block pb-3 last:pb-0 group animate-timeline-enter"
               >
                 <span
                   className={cn(

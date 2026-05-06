@@ -253,3 +253,17 @@
 .animate-scale-in {
   animation: scale-in var(--duration-normal) var(--ease-spring) forwards;
 }
+
+@keyframes timeline-enter {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-timeline-enter {
+  animation: timeline-enter 0.7s var(--ease-out-expo) forwards;
+}

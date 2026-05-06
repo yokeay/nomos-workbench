@@ -97,17 +97,15 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Apply since filter
-    let filtered = deduped
-    if (since) {
-      const sinceTs = parseInt(since)
-      if (!isNaN(sinceTs)) {
-        filtered = allItems.filter(item => {
+    // Apply time window filter (default 24h)
+    const now = Date.now()
+    const sinceTs = since ? parseInt(since) : (now - 24 * 60 * 60 * 1000)
+    const filtered = !isNaN(sinceTs)
+      ? deduped.filter(item => {
           const pd = item.pubDate ?? 0
           return (typeof pd === "number" ? pd : 0) > sinceTs
         })
-      }
-    }
+      : deduped
 
     return NextResponse.json({
       code: 0,
