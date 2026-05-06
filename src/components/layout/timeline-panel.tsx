@@ -23,7 +23,7 @@ function relativeTime(date: number | string): string {
   return new Date(ts).toLocaleDateString();
 }
 
-function TypewriterText({ text, speed = 25, className }: { text: string; speed?: number; className?: string }) {
+function TypewriterText({ text, speed = 75, className }: { text: string; speed?: number; className?: string }) {
   const [chars, setChars] = useState(0);
   const textRef = useRef(text);
 
@@ -97,10 +97,10 @@ export function TimelinePanel() {
       </div>
 
       <div className="flex-1 overflow-hidden">
-        <div className={activeChannel === 'ai' ? '' : 'hidden'}>
+        <div className={activeChannel === 'ai' ? 'h-full' : 'hidden'}>
           <AITimeline />
         </div>
-        <div className={activeChannel === 'news' ? '' : 'hidden'}>
+        <div className={activeChannel === 'news' ? 'h-full' : 'hidden'}>
           <NewsTimeline />
         </div>
       </div>
@@ -260,7 +260,7 @@ function NewsTimeline() {
     if (all.length === 0) return;
 
     // If we have many items cached, reveal them staggered
-    revealTimerRef.current = setInterval(revealNext, 2000);
+    revealTimerRef.current = setInterval(revealNext, 6000);
     // Immediately reveal first (oldest) item
     revealNext();
   }, [revealNext]);
@@ -306,7 +306,7 @@ function NewsTimeline() {
     if (revealTimerRef.current) {
       clearInterval(revealTimerRef.current);
     }
-    revealTimerRef.current = setInterval(revealNext, 2000);
+    revealTimerRef.current = setInterval(revealNext, 6000);
     revealNext();
   }, [revealNext]);
 
