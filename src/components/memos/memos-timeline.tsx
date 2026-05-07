@@ -82,15 +82,17 @@ export function MemosTimeline({ refreshKey, onSelectMemo }: MemosTimelineProps) 
 
       <div className="space-y-3">
         {memos.map((memo) => (
-          <button
+          <div
             key={memo.id}
-            onClick={() => onSelectMemo(memo)}
             className="relative block w-full text-left group"
           >
             <div className="absolute -left-[calc(1rem+1.5px)] top-1.5 w-1.5 h-1.5 rounded-full bg-border group-hover:bg-foreground/40 transition-colors duration-fast" />
 
             <div className="space-y-0.5">
-              <div className="prose prose-xs max-w-none text-foreground/80 line-clamp-2">
+              <button
+                onClick={() => onSelectMemo(memo)}
+                className="prose prose-xs max-w-none text-foreground/80 line-clamp-2 text-left cursor-pointer"
+              >
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
                   urlTransform={(url) => {
@@ -100,12 +102,12 @@ export function MemosTimeline({ refreshKey, onSelectMemo }: MemosTimelineProps) 
                 >
                   {memo.content}
                 </ReactMarkdown>
-              </div>
+              </button>
               <span className="text-[10px] text-muted-foreground/40">
                 {relativeTime(memo.createdAt)}
               </span>
             </div>
-          </button>
+          </div>
         ))}
       </div>
     </div>
