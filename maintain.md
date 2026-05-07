@@ -28,6 +28,21 @@
 - `src/app/api/todos/route.ts` — 新建，GET/POST 待办列表
 - `src/app/api/todos/[id]/route.ts` — 新建，PUT/DELETE 单个待办
 - `src/app/api/todos/reorder/route.ts` — 新建，PUT 批量排序
+- **终端独立页面**：终端从聊天页 overlay 改为 `/terminal` 独立路由，暗色系统监控面板风格
+  - 系统信息面板（主机名/IP/OS/CPU/内存/磁盘/网络IO/进程/负载/运行时间）
+  - 资源趋势 sparkline + 进度条展示
+  - 底部 xterm 终端交互区（复用 gotty WebSocket）
+- **Memos Tab 联动修复**：右面板始终渲染编辑器+时间线，非笔记 tab 不再显示占位文字；首个 tab 标签改为「代办」
+- **历史上的今天缓存**：新增 `nomos_dev_history_onthisday` 表，首次请求 Wikipedia API 后缓存，后续从 DB 读取
+- **万年历缓存**：新增 `nomos_dev_almanac` 表，首次计算农历后缓存，后续从 DB 读取
+- `src/app/(dashboard)/terminal/page.tsx` — 新建，终端页面主组件
+- `src/components/terminal/sys-info-panel.tsx` — 新建，系统信息+资源监控面板
+- `src/components/terminal/terminal-panel.tsx` — 新建，xterm 终端面板
+- `src/components/layout/sidebar.tsx` — Terminal 按钮改为路由跳转
+- `src/app/api/history/today/route.ts` — 新增 DB 缓存逻辑
+- `src/app/api/almanac/today/route.ts` — 新增 DB 缓存逻辑
+- `src/components/memos/tab-bar.tsx` — 标签改名「代办」
+- `drizzle/0003_adorable_stone_men.sql` — 迁移文件（history_onthisday + almanac 表）
 
 ---
 

@@ -229,6 +229,29 @@ export const auditLogs = sqliteTable(`${BUSINESS_PREFIX}audit_logs`, {
 });
 
 // =====================
+// History On This Day cache
+// =====================
+
+export const historyOnthisday = sqliteTable(`${BUSINESS_PREFIX}history_onthisday`, {
+  id: text('id').primaryKey(), // composite: "MM-DD"
+  month: text('month').notNull(),
+  day: text('day').notNull(),
+  data: text('data').notNull(), // JSON: { selected, events, births, deaths }
+  createdAt: integer('created_at').notNull(),
+});
+
+// =====================
+// Almanac cache
+// =====================
+
+export const almanac = sqliteTable(`${BUSINESS_PREFIX}almanac`, {
+  id: text('id').primaryKey(), // "YYYY-MM-DD"
+  date: text('date').unique().notNull(),
+  data: text('data').notNull(), // JSON: full almanac response
+  createdAt: integer('created_at').notNull(),
+});
+
+// =====================
 // Type exports
 // =====================
 

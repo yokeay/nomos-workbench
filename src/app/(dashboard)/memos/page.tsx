@@ -87,43 +87,33 @@ export default function MemosPage() {
         </div>
       </div>
 
-      {/* Right content area */}
+      {/* Right content area — always memos */}
       <div className="flex-1 flex flex-col min-w-0 relative">
-        {activeTab === 'notes' ? (
-          <div className="flex-1 flex flex-col p-4 gap-4 overflow-auto">
-            {isLoading ? null : isLoggedIn ? (
-              <>
-                {/* Editor */}
-                <MemosEditor onPublish={handlePublish} publishing={publishing} />
-
-                {/* Timeline */}
-                <div className="flex-1 overflow-auto no-scrollbar">
-                  <MemosTimeline
-                    refreshKey={refreshKey}
-                    onSelectMemo={handleSelectMemo}
-                  />
-                </div>
-              </>
-            ) : (
-              <div className="flex-1 flex flex-col items-center justify-center gap-3 text-muted-foreground/40">
-                <LogIn className="w-10 h-10" />
-                <p className="text-sm font-medium">请先登录后再发布笔记</p>
-                <a
-                  href="/login"
-                  className="text-xs text-primary/60 hover:text-primary/80 transition-colors underline underline-offset-2"
-                >
-                  前往登录
-                </a>
+        <div className="flex-1 flex flex-col p-4 gap-4 overflow-auto">
+          {isLoading ? null : isLoggedIn ? (
+            <>
+              <MemosEditor onPublish={handlePublish} publishing={publishing} />
+              <div className="flex-1 overflow-auto no-scrollbar">
+                <MemosTimeline
+                  refreshKey={refreshKey}
+                  onSelectMemo={handleSelectMemo}
+                />
               </div>
-            )}
-          </div>
-        ) : (
-          <div className="flex-1 p-4 flex items-center justify-center text-xs text-muted-foreground/30">
-            {activeTab === 'history' ? '选择日期查看历史事件' : '选择日期查看农历信息'}
-          </div>
-        )}
+            </>
+          ) : (
+            <div className="flex-1 flex flex-col items-center justify-center gap-3 text-muted-foreground/40">
+              <LogIn className="w-10 h-10" />
+              <p className="text-sm font-medium">请先登录后再发布笔记</p>
+              <a
+                href="/login"
+                className="text-xs text-primary/60 hover:text-primary/80 transition-colors underline underline-offset-2"
+              >
+                前往登录
+              </a>
+            </div>
+          )}
+        </div>
 
-        {/* Detail drawer — inside relative container so absolute positioning is relative to right panel */}
         <MemoDetailDrawer
           memo={selectedMemo}
           open={drawerOpen}

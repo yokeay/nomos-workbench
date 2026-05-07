@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next';
 import { useSession, signIn, signOut } from 'next-auth/react';
 import { useSettingsStore } from '@/stores';
 import { cn } from '@/lib/utils';
-import { useTerminalStore } from '@/stores';
 import {
   Globe, LayoutDashboard, Calendar, Settings, Terminal,
   User, Sun, Moon, Languages, LogOut, LogIn,
@@ -19,7 +18,6 @@ export function Sidebar() {
   const router = useRouter();
   const { data: session, status } = useSession();
   const { theme, toggleTheme, locale, setLocale } = useSettingsStore();
-  const { isOpen, open } = useTerminalStore();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -36,10 +34,7 @@ export function Sidebar() {
   }, [menuOpen]);
 
   const handleTerminalClick = () => {
-    open();
-    if (pathname !== '/dashboard') {
-      router.push('/dashboard');
-    }
+    router.push('/terminal');
   };
 
   const navItems = [
@@ -88,7 +83,7 @@ export function Sidebar() {
           title={t('sidebar:terminal')}
           className={cn(
             'relative flex items-center justify-center h-11 rounded-xl transition-all duration-normal w-full',
-            isOpen
+            pathname === '/terminal'
               ? 'bg-sidebar-active text-sidebar-foreground shadow-subtle'
               : 'text-muted-foreground/60 hover:text-sidebar-foreground/80 hover:bg-sidebar-hover'
           )}

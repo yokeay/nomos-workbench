@@ -11,7 +11,7 @@ interface TabBarProps {
 }
 
 const TABS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
-  { key: 'notes', label: '笔记', icon: <FileText className="w-3.5 h-3.5" /> },
+  { key: 'notes', label: '代办', icon: <FileText className="w-3.5 h-3.5" /> },
   { key: 'history', label: '历史上的今天', icon: <Clock className="w-3.5 h-3.5" /> },
   { key: 'almanac', label: '万年历', icon: <Moon className="w-3.5 h-3.5" /> },
 ]

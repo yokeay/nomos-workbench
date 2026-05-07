@@ -27,6 +27,8 @@ export const TABLES = {
   calendarEvents: `${BUSINESS_PREFIX}calendar_events`,
   storageConfig: `${BUSINESS_PREFIX}storage_config`,
   todos: `${BUSINESS_PREFIX}todos`,
+  historyOnthisday: `${BUSINESS_PREFIX}history_onthisday`,
+  almanac: `${BUSINESS_PREFIX}almanac`,
 } as const;
 
 // ==================== Lazy DB connection ====================

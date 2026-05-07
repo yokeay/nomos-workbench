@@ -45,6 +45,10 @@
 - [x] 笔记抽屉内编辑：view/edit 模式切换 + PUT API ✅ 2026-05-07
 - [x] 抽屉位置修正：fixed → absolute 不覆盖新闻面板 ✅ 2026-05-07
 - [x] Todo 待办功能：DB表 + API + 统计卡片 + 拖拽排序 + 筛选标签 ✅ 2026-05-07
+- [x] 终端独立页面：/terminal 路由 + 系统监控面板 + xterm ✅ 2026-05-07
+- [x] Memos Tab 联动修复：右面板始终显示 + 标签改名 ✅ 2026-05-07
+- [x] 历史上的今天 DB 缓存：Wikipedia API 结果缓存到 history_onthisday 表 ✅ 2026-05-07
+- [x] 万年历 DB 缓存：lunar-typescript 计算结果缓存到 almanac 表 ✅ 2026-05-07
 
 ---
 
