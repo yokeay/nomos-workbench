@@ -122,16 +122,16 @@ export default function MemosPage() {
             {activeTab === 'history' ? '选择日期查看历史事件' : '选择日期查看农历信息'}
           </div>
         )}
-      </div>
 
-      {/* Detail drawer */}
-      <MemoDetailDrawer
-        memo={selectedMemo}
-        open={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-        onDelete={handleDeleteMemo}
-        onUpdate={handleUpdateMemo}
-      />
+        {/* Detail drawer — inside relative container so absolute positioning is relative to right panel */}
+        <MemoDetailDrawer
+          memo={selectedMemo}
+          open={drawerOpen}
+          onClose={() => setDrawerOpen(false)}
+          onDelete={handleDeleteMemo}
+          onUpdate={handleUpdateMemo}
+        />
+      </div>
     </div>
   )
 }

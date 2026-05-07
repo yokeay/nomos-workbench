@@ -160,12 +160,13 @@ export function TodoView({ date }: TodoViewProps) {
       if (json.code === 0) {
         setTodos((json.data as Todo[]).sort(sortTodos))
       }
-    } catch {
-      // silent fail
+    } catch (err) {
+      console.error('Failed to fetch todos:', err)
+      toast.error('Failed to load todos')
     } finally {
       setLoading(false)
     }
-  }, [date])
+  }, [date, toast])
 
   useEffect(() => {
     fetchTodos()
