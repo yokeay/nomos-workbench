@@ -40,6 +40,11 @@
 - [x] 操作保护：Memos/Settings/API 未登录门控 ✅ 2026-05-06
 - [x] Toast 居中 + DUFS 图片代理 + Markdown 渲染修复 ✅ 2026-05-06
 - [x] 终端 WebSocket URL 配置：设置页面 + localStorage 持久化 ✅ 2026-05-06
+- [x] 新闻渠道过滤：设置页面多选 + 时间线过滤 + localStorage 持久化 ✅ 2026-05-07
+- [x] Memos 骨架屏修正：两栏布局匹配 ✅ 2026-05-07
+- [x] 笔记抽屉内编辑：view/edit 模式切换 + PUT API ✅ 2026-05-07
+- [x] 抽屉位置修正：fixed → absolute 不覆盖新闻面板 ✅ 2026-05-07
+- [x] Todo 待办功能：DB表 + API + 统计卡片 + 拖拽排序 + 筛选标签 ✅ 2026-05-07
 
 ---
 

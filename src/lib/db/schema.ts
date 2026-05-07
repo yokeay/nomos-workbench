@@ -178,6 +178,25 @@ export const memos = sqliteTable(`${BUSINESS_PREFIX}memos`, {
   createdIdx: index('memos_created_idx').on(table.createdAt),
 }));
 
+// =====================
+// Todos
+// =====================
+
+export const todos = sqliteTable(`${BUSINESS_PREFIX}todos`, {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull().references(() => users.id),
+  date: text('date').notNull(),            // YYYY-MM-DD
+  title: text('title').notNull(),
+  content: text('content').default(''),    // 纯文本，换行=子任务
+  sortOrder: integer('sort_order').notNull().default(0),
+  completed: integer('completed').notNull().default(0), // 0=未完成, 1=已完成
+  createdAt: integer('created_at').notNull(),
+  updatedAt: integer('updated_at').notNull(),
+}, (table) => ({
+  userDateIdx: index('todos_user_date_idx').on(table.userId, table.date),
+  sortIdx: index('todos_sort_idx').on(table.userId, table.date, table.sortOrder),
+}));
+
 export const memoAttachments = sqliteTable(`${BUSINESS_PREFIX}memo_attachments`, {
   id: text('id').primaryKey(),
   memoId: text('memo_id').notNull().references(() => memos.id),
@@ -254,3 +273,6 @@ export type NewMemoAttachment = typeof memoAttachments.$inferInsert;
 
 export type StorageConfig = typeof storageConfig.$inferSelect;
 export type NewStorageConfig = typeof storageConfig.$inferInsert;
+
+export type Todo = typeof todos.$inferSelect;
+export type NewTodo = typeof todos.$inferInsert;

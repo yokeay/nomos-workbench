@@ -8,7 +8,9 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { User, Palette, Globe, Key, HardDrive, Save, Server, Terminal as TerminalIcon, LogIn } from 'lucide-react';
+import { User, Palette, Globe, Key, HardDrive, Save, Server, Terminal as TerminalIcon, LogIn, Filter } from 'lucide-react';
+import { sources } from '@/lib/newsnow/sources';
+import { useNewsFilterStore, deselectAllSources } from '@/stores/news-filter';
 
 export default function SettingsPage() {
   const { t } = useTranslation();
@@ -197,6 +199,22 @@ export default function SettingsPage() {
           </CardHeader>
           <CardContent>
             <TerminalManager />
+          </CardContent>
+        </Card>
+
+        {/* News Filter */}
+        <Card className="bg-card/60 border-border/60 shadow-sm-soft rounded-2xl">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base font-semibold flex items-center gap-2">
+              <Filter className="w-4 h-4 text-foreground/50" />
+              {t('settings:newsFilter')}
+            </CardTitle>
+            <CardDescription className="text-xs text-muted-foreground/70">
+              {t('settings:newsFilterDesc')}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <NewsFilterManager />
           </CardContent>
         </Card>
 
@@ -686,4 +704,95 @@ function BackupManager() {
       </div>
     </div>
   );
+}
+
+const COLUMN_LABELS: Record<string, string> = {
+  tech: 'settings:newsFilterColumnTech',
+  china: 'settings:newsFilterColumnChina',
+  finance: 'settings:newsFilterColumnFinance',
+  world: 'settings:newsFilterColumnWorld',
+}
+
+function NewsFilterManager() {
+  const { t } = useTranslation()
+  const { disabledSourceIds, toggleSource, selectAll } = useNewsFilterStore()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => { setMounted(true) }, [])
+
+  if (!mounted) return null
+
+  const allIDs = Array.from(sources.keys())
+
+  // Group by column
+  const groups: Record<string, typeof allIDs> = { other: [] }
+  for (const id of allIDs) {
+    const meta = sources.get(id)
+    const col = meta?.definition.column || 'other'
+    const key = COLUMN_LABELS[col] ? col : 'other'
+    if (!groups[key]) groups[key] = []
+    groups[key].push(id)
+  }
+
+  const enabledCount = allIDs.filter((id) => !disabledSourceIds.has(id)).length
+
+  return (
+    <div className="space-y-3">
+      {/* Summary + actions */}
+      <div className="flex items-center justify-between">
+        <span className="text-xs text-muted-foreground/60">
+          {t('settings:newsFilterEnabled')}: {enabledCount}/{allIDs.length}
+        </span>
+        <div className="flex gap-1.5">
+          <button
+            onClick={selectAll}
+            className="text-[10px] px-2 py-1 rounded-lg bg-muted/50 border border-border/40 text-muted-foreground/70 hover:text-foreground/80 transition-colors"
+          >
+            {t('settings:newsFilterSelectAll')}
+          </button>
+          <button
+            onClick={() => deselectAllSources(allIDs)}
+            className="text-[10px] px-2 py-1 rounded-lg bg-muted/50 border border-border/40 text-muted-foreground/70 hover:text-foreground/80 transition-colors"
+          >
+            {t('settings:newsFilterDeselectAll')}
+          </button>
+        </div>
+      </div>
+
+      {/* Columns */}
+      {Object.entries(groups).map(([col, ids]) => {
+        if (ids.length === 0) return null
+        const labelKey = COLUMN_LABELS[col] || 'settings:newsFilterColumnOther'
+        return (
+          <div key={col}>
+            <div className="text-[10px] font-medium text-muted-foreground/50 mb-1.5 uppercase tracking-wider">
+              {t(labelKey)}
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {ids.map((id) => {
+                const meta = sources.get(id)
+                const name = meta?.definition.name || id
+                const enabled = !disabledSourceIds.has(id)
+                return (
+                  <button
+                    key={id}
+                    onClick={() => toggleSource(id)}
+                    className={`
+                      text-[10px] px-2.5 py-1 rounded-full border transition-all duration-fast
+                      ${enabled
+                        ? 'bg-accent/40 border-border/50 text-foreground/70 hover:bg-accent/60'
+                        : 'bg-transparent border-border/20 text-muted-foreground/30 hover:border-border/40 line-through'
+                      }
+                    `}
+                  >
+                    {name}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
 }

@@ -8,6 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useTimelineStore } from '@/stores';
 import { cn } from '@/lib/utils';
 import { Bot, Newspaper, Loader2 } from 'lucide-react';
+import { useNewsFilterStore } from '@/stores/news-filter';
 
 function relativeTime(date: number | string): string {
   const ts = typeof date === 'string' ? Date.parse(date) : date;
@@ -353,6 +354,8 @@ function NewsTimeline() {
     const novel = incoming.filter((item: any) => {
       const key = itemKey(item);
       if (seenRef.current.has(key)) return false;
+      // News filter: skip items from disabled sources
+      if (!useNewsFilterStore.getState().isEnabled(item.sourceId)) return false;
       // 24h sliding window: skip items older than 24h (pubDate=0/undefined treated as recent)
       const pd = item.pubDate;
       if (pd && pd !== 0) {

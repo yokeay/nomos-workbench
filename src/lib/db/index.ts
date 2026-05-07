@@ -26,6 +26,7 @@ export const TABLES = {
   memoAttachments: `${BUSINESS_PREFIX}memo_attachments`,
   calendarEvents: `${BUSINESS_PREFIX}calendar_events`,
   storageConfig: `${BUSINESS_PREFIX}storage_config`,
+  todos: `${BUSINESS_PREFIX}todos`,
 } as const;
 
 // ==================== Lazy DB connection ====================

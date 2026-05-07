@@ -1,5 +1,36 @@
 # NOMOS Workbench - 版本迭代记录
 
+## v0.2.6 - 2026-05-07
+
+### 变更内容
+- **新闻渠道过滤**：设置页面新增「新闻渠道」卡片，支持按技术/国内/财经/国际/其他分组多选过滤，持久化到 localStorage
+- **Memos 骨架屏修正**：loading.tsx 更新为两栏布局（左 w-[334px] + 右 flex-1），与实际页面结构匹配
+- **笔记抽屉内编辑**：笔记详情抽屉新增编辑模式，支持修改 Markdown 内容并通过 PUT /api/memos/[id] 保存
+- **抽屉位置修正**：MemoDetailDrawer 从 fixed 定位改为 absolute，仅覆盖右侧面板不覆盖新闻时间线
+- **Todo 待办功能**：Memos 日历下方新增 Todo 应用，支持创建/编辑/查看/删除待办、勾选完成/未完成、拖拽排序
+  - 数据库新增 `nomos_dev_todos` 表
+  - 新增 API：GET/POST /api/todos, PUT/DELETE /api/todos/[id], PUT /api/todos/reorder
+  - 统计卡片（全部/已完成/未完成）+ 过滤标签 + 拖拽排序（@dnd-kit）
+
+### 修改/新增文件
+- `src/stores/news-filter.ts` — 新建，新闻渠道过滤 zustand store
+- `src/app/(dashboard)/settings/page.tsx` — 新增 NewsFilterManager 组件
+- `src/components/layout/timeline-panel.tsx` — addToCache 加入新闻源过滤
+- `src/i18n/config.ts` — 新增 settings.newsFilter / todo / memos 翻译 key
+- `src/app/(dashboard)/memos/loading.tsx` — 重写为两栏骨架屏
+- `src/components/memos/memo-detail-drawer.tsx` — 新增编辑模式 + 定位改为 absolute
+- `src/app/api/memos/[id]/route.ts` — 新增 PUT handler
+- `src/app/(dashboard)/memos/page.tsx` — 集成 TodoView + onUpdate 回调 + 右面板 relative
+- `src/lib/db/schema.ts` — 新增 todos 表定义
+- `src/lib/db/index.ts` — 注册 todos 表
+- `src/components/memos/todo-view.tsx` — 新建，Todo 主组件
+- `src/components/memos/todo-dialog.tsx` — 新建，Todo 创建/编辑/查看对话框
+- `src/app/api/todos/route.ts` — 新建，GET/POST 待办列表
+- `src/app/api/todos/[id]/route.ts` — 新建，PUT/DELETE 单个待办
+- `src/app/api/todos/reorder/route.ts` — 新建，PUT 批量排序
+
+---
+
 ## v0.2.5 - 2026-05-06
 
 ### 变更内容

@@ -11,6 +11,7 @@ import { MemosTimeline } from '@/components/memos/memos-timeline'
 import { MemoDetailDrawer } from '@/components/memos/memo-detail-drawer'
 import { HistoryDisplay } from '@/components/memos/history-display'
 import { AlmanacDisplay } from '@/components/memos/almanac-display'
+import { TodoView } from '@/components/memos/todo-view'
 
 interface Memo {
   id: string
@@ -26,6 +27,10 @@ export default function MemosPage() {
   const [refreshKey, setRefreshKey] = useState(0)
   const [selectedMemo, setSelectedMemo] = useState<Memo | null>(null)
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const d = new Date()
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  })
   const { isLoggedIn, isLoading } = useAuth()
   const toast = useToast()
 
@@ -55,25 +60,35 @@ export default function MemosPage() {
     setRefreshKey((k) => k + 1)
   }, [])
 
+  const handleUpdateMemo = useCallback((memo: Memo) => {
+    setSelectedMemo(memo)
+    setRefreshKey((k) => k + 1)
+  }, [])
+
   return (
     <div className="flex h-full">
       {/* Left panel */}
       <div className="w-[334px] shrink-0 border-r border-border/40 flex flex-col p-3 gap-3">
         {/* Small calendar at top */}
-        <SmallCalendar />
+        <SmallCalendar
+          onDateChange={(date) =>
+            setSelectedDate(`${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`)
+          }
+        />
 
         {/* Tab bar */}
         <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
 
         {/* Tab content below */}
         <div className="flex-1 overflow-auto no-scrollbar">
+          {activeTab === 'notes' && <TodoView date={selectedDate} />}
           {activeTab === 'history' && <HistoryDisplay />}
           {activeTab === 'almanac' && <AlmanacDisplay />}
         </div>
       </div>
 
       {/* Right content area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 relative">
         {activeTab === 'notes' ? (
           <div className="flex-1 flex flex-col p-4 gap-4 overflow-auto">
             {isLoading ? null : isLoggedIn ? (
@@ -115,6 +130,7 @@ export default function MemosPage() {
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         onDelete={handleDeleteMemo}
+        onUpdate={handleUpdateMemo}
       />
     </div>
   )
