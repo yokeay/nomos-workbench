@@ -353,6 +353,12 @@ function NewsTimeline() {
     const novel = incoming.filter((item: any) => {
       const key = itemKey(item);
       if (seenRef.current.has(key)) return false;
+      // 24h sliding window: skip items older than 24h (pubDate=0/undefined treated as recent)
+      const pd = item.pubDate;
+      if (pd && pd !== 0) {
+        const ts = typeof pd === 'string' ? Date.parse(pd) : pd;
+        if (ts && !isNaN(ts) && ts !== 0 && Date.now() - ts > 24 * 60 * 60 * 1000) return false;
+      }
       seenRef.current.add(key);
       return true;
     });

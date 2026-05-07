@@ -25,3 +25,16 @@ export function isFresh(id: string, ttl: number = Interval): boolean {
 export function getStaleIDs(ids: string[]): string[] {
   return ids.filter(id => !isFresh(id))
 }
+
+const WINDOW_24H = 24 * 60 * 60 * 1000
+
+export function isWithin24h(item: { pubDate?: number | string }): boolean {
+  const pd = item.pubDate
+  if (pd === undefined || pd === null || pd === 0) {
+    // Items without pubDate (e.g. hottest lists) treated as recent
+    return true
+  }
+  const ts = typeof pd === 'string' ? Date.parse(pd) : pd
+  if (!ts || isNaN(ts) || ts === 0) return true
+  return Date.now() - ts < WINDOW_24H
+}

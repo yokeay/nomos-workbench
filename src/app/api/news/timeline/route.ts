@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { sources } from "@/lib/newsnow/sources"
-import { getCache, setCache, isFresh } from "@/lib/newsnow/cache"
+import { getCache, setCache, isFresh, isWithin24h } from "@/lib/newsnow/cache"
 import type { TimelineItem, NewsItem } from "@/lib/newsnow/types"
 
 function mapSourceItems(
@@ -101,15 +101,21 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Apply time window filter (default 24h)
-    const now = Date.now()
-    const sinceTs = since ? parseInt(since) : (now - 24 * 60 * 60 * 1000)
-    const filtered = !isNaN(sinceTs)
-      ? deduped.filter(item => {
-          const pd = item.pubDate ?? 0
-          return (typeof pd === "number" ? pd : 0) > sinceTs
+    // Apply 24h sliding window filter; items without pubDate (hot lists) pass through
+    let filtered = deduped.filter(item => isWithin24h(item))
+
+    // Additional incremental filter when client provides since param
+    if (since) {
+      const sinceTs = parseInt(since)
+      if (!isNaN(sinceTs)) {
+        filtered = filtered.filter(item => {
+          const pd = item.pubDate
+          if (pd === undefined || pd === null || pd === 0) return true
+          const ts = typeof pd === 'string' ? Date.parse(pd) : pd
+          return !ts || isNaN(ts) || ts === 0 || ts > sinceTs
         })
-      : deduped
+      }
+    }
 
     return NextResponse.json({
       code: 0,

@@ -1,5 +1,5 @@
 import { sources } from './sources';
-import { getCache, setCache, isFresh } from './cache';
+import { getCache, setCache, isFresh, isWithin24h } from './cache';
 import { db, newsTimeline } from '@/lib/db';
 import type { TimelineItem, NewsItem } from './types';
 
@@ -75,6 +75,7 @@ async function fetchAndBroadcast() {
         return (db as number) - (da as number) || 0;
       });
       for (const item of sorted.slice(0, perSource)) {
+        if (!isWithin24h(item)) continue;
         freshItems.push({
           ...item,
           sourceId: id,
@@ -140,6 +141,7 @@ function buildSnapshot(): TimelineItem[] {
       return (db as number) - (da as number) || 0;
     });
     for (const item of sorted.slice(0, perSource)) {
+      if (!isWithin24h(item)) continue;
       allItems.push({
         ...item,
         sourceId: id,
