@@ -70,7 +70,7 @@ export function MemosTimeline({ refreshKey, onSelectMemo }: MemosTimelineProps) 
 
   if (memos.length === 0) {
     return (
-      <div className="py-8 text-center text-xs text-muted-foreground/40">
+      <div className="py-8 text-center text-xs text-muted-foreground/55">
         暂无笔记，开始写第一条吧
       </div>
     )
@@ -86,7 +86,7 @@ export function MemosTimeline({ refreshKey, onSelectMemo }: MemosTimelineProps) 
             key={memo.id}
             className="relative block w-full text-left group"
           >
-            <div className="absolute -left-[calc(1rem+1.5px)] top-1.5 w-1.5 h-1.5 rounded-full bg-border group-hover:bg-foreground/40 transition-colors duration-fast" />
+            <div className="absolute -left-[calc(1rem+1.5px)] top-1.5 w-1.5 h-1.5 rounded-full bg-border/60 group-hover:bg-foreground/50 transition-colors duration-fast" />
 
             <div className="space-y-0.5">
               <button
@@ -103,7 +103,7 @@ export function MemosTimeline({ refreshKey, onSelectMemo }: MemosTimelineProps) 
                   {memo.content}
                 </ReactMarkdown>
               </button>
-              <span className="text-[10px] text-muted-foreground/40">
+              <span className="text-[10px] text-muted-foreground/55">
                 {relativeTime(memo.createdAt)}
               </span>
             </div>

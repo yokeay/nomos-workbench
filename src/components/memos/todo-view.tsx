@@ -100,8 +100,8 @@ function TodoItem({
         className={cn(
           'text-xs flex-1 truncate transition-colors',
           todo.completed
-            ? 'text-muted-foreground/30 line-through'
-            : 'text-foreground/70'
+            ? 'text-muted-foreground/35 line-through'
+            : 'text-foreground/80'
         )}
       >
         {todo.title}
@@ -200,6 +200,19 @@ export function TodoView({ date }: TodoViewProps) {
     }
   }, [fetchTodos])
 
+  const checkAllDone = useCallback((content: string) => {
+    const lines = content.split('\n').filter(Boolean)
+    return lines.length > 0 && lines.every((line) => /^- \[[xX]\] /.test(line))
+  }, [])
+
+  const autoComplete = useCallback(async (id: string) => {
+    await fetch(`/api/todos/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ completed: true }),
+    })
+  }, [])
+
   const handleSave = useCallback(async (data: { title: string; content: string }) => {
     if (dialogMode === 'create') {
       const res = await fetch('/api/todos', {
@@ -210,6 +223,9 @@ export function TodoView({ date }: TodoViewProps) {
       const json = await res.json()
       if (json.code === 0) {
         toast.success(t.created)
+        if (checkAllDone(data.content)) {
+          await autoComplete(json.data.id)
+        }
         fetchTodos()
       }
     } else if (dialogTodo) {
@@ -220,11 +236,19 @@ export function TodoView({ date }: TodoViewProps) {
       })
       const json = await res.json()
       if (json.code === 0) {
-        toast.success(t.updated)
+        if (checkAllDone(data.content)) {
+          await autoComplete(dialogTodo.id)
+        } else {
+          await fetch(`/api/todos/${dialogTodo.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ completed: false }),
+          })
+        }
         fetchTodos()
       }
     }
-  }, [dialogMode, dialogTodo, date, fetchTodos, toast, t])
+  }, [dialogMode, dialogTodo, date, fetchTodos, toast, t, checkAllDone, autoComplete])
 
   const handleDragEnd = useCallback(async (event: DragEndEvent) => {
     const { active, over } = event
@@ -279,7 +303,7 @@ export function TodoView({ date }: TodoViewProps) {
             )}
           >
             <div className="text-sm font-semibold text-foreground/80">{count}</div>
-            <div className="text-[9px] text-muted-foreground/40">{label}</div>
+            <div className="text-[9px] text-muted-foreground/55">{label}</div>
           </div>
         ))}
       </div>
@@ -292,7 +316,7 @@ export function TodoView({ date }: TodoViewProps) {
             'flex-1 text-center py-1.5 text-[11px] font-medium transition-colors border-b-2 -mb-[1px]',
             filterTab === 'uncompleted'
               ? 'border-foreground/60 text-foreground/80'
-              : 'border-transparent text-muted-foreground/40 hover:text-muted-foreground/60'
+              : 'border-transparent text-muted-foreground/55 hover:text-muted-foreground/70'
           )}
         >
           {t.tabUncompleted} ({uncompleted.length})
@@ -303,7 +327,7 @@ export function TodoView({ date }: TodoViewProps) {
             'flex-1 text-center py-1.5 text-[11px] font-medium transition-colors border-b-2 -mb-[1px]',
             filterTab === 'completed'
               ? 'border-foreground/60 text-foreground/80'
-              : 'border-transparent text-muted-foreground/40 hover:text-muted-foreground/60'
+              : 'border-transparent text-muted-foreground/55 hover:text-muted-foreground/70'
           )}
         >
           {t.tabCompleted} ({completed.length})
@@ -317,7 +341,7 @@ export function TodoView({ date }: TodoViewProps) {
             <div className="w-4 h-4 border-2 border-foreground/20 border-t-foreground/40 rounded-full animate-spin" />
           </div>
         ) : displayed.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-8 gap-2 text-muted-foreground/25">
+          <div className="flex flex-col items-center justify-center py-8 gap-2 text-muted-foreground/35">
             <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M9 11l3 3L22 4" />
               <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
@@ -364,7 +388,7 @@ export function TodoView({ date }: TodoViewProps) {
           setDialogMode('create')
           setDialogOpen(true)
         }}
-        className="flex items-center justify-center gap-1.5 mt-2 py-2 rounded-xl border border-dashed border-border/40 hover:border-foreground/20 hover:bg-accent/20 text-muted-foreground/40 hover:text-foreground/60 transition-colors"
+        className="flex items-center justify-center gap-1.5 mt-2 py-2 rounded-xl border border-dashed border-border/40 hover:border-foreground/20 hover:bg-accent/20 text-muted-foreground/55 hover:text-foreground/70 transition-colors"
       >
         <Plus className="w-3.5 h-3.5" />
         <span className="text-[11px] font-medium">{t.addTodo}</span>

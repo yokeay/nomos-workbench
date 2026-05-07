@@ -11,6 +11,11 @@ type DialogMode = 'view' | 'edit' | 'create'
 
 const MAX_SUBTASKS = 100
 
+interface Subtask {
+  text: string
+  completed: boolean
+}
+
 interface TodoDialogProps {
   mode: DialogMode
   todo: Todo | null
@@ -19,9 +24,22 @@ interface TodoDialogProps {
   onSave: (data: { title: string; content: string }) => Promise<void>
 }
 
-function parseSubtasks(content: string): string[] {
+function parseSubtasks(content: string): Subtask[] {
   const lines = content.split('\n').filter(Boolean)
-  return lines.length > 0 ? lines : ['']
+  return lines.map((line) => {
+    const m = line.match(/^- \[([xX ])\] (.+)$/)
+    if (m) {
+      return { text: m[2], completed: m[1].toLowerCase() === 'x' }
+    }
+    return { text: line.replace(/^- /, ''), completed: false }
+  })
+}
+
+function serializeSubtasks(items: Subtask[]): string {
+  return items
+    .filter((s) => s.text.trim())
+    .map((s) => `- [${s.completed ? 'x' : ' '}] ${s.text}`)
+    .join('\n')
 }
 
 export function TodoDialog({ mode: initialMode, todo, open, onClose, onSave }: TodoDialogProps) {
@@ -30,7 +48,7 @@ export function TodoDialog({ mode: initialMode, todo, open, onClose, onSave }: T
 
   const [mode, setMode] = useState<DialogMode>(initialMode)
   const [title, setTitle] = useState('')
-  const [subtasks, setSubtasks] = useState<string[]>([''])
+  const [subtasks, setSubtasks] = useState<Subtask[]>([{ text: '', completed: false }])
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
@@ -38,7 +56,7 @@ export function TodoDialog({ mode: initialMode, todo, open, onClose, onSave }: T
       setMode(initialMode)
       if (initialMode === 'create') {
         setTitle('')
-        setSubtasks([''])
+        setSubtasks([{ text: '', completed: false }])
       } else if (todo) {
         setTitle(todo.title)
         setSubtasks(parseSubtasks(todo.content || ''))
@@ -46,10 +64,10 @@ export function TodoDialog({ mode: initialMode, todo, open, onClose, onSave }: T
     }
   }, [open, initialMode, todo])
 
-  const handleSave = useCallback(async () => {
+  const save = useCallback(async (items: Subtask[]) => {
     const trimmedTitle = title.trim()
     if (!trimmedTitle) return
-    const content = subtasks.filter((s) => s.trim()).join('\n')
+    const content = serializeSubtasks(items)
     setSaving(true)
     try {
       await onSave({ title: trimmedTitle, content })
@@ -57,12 +75,35 @@ export function TodoDialog({ mode: initialMode, todo, open, onClose, onSave }: T
     } finally {
       setSaving(false)
     }
-  }, [title, subtasks, onSave, onClose])
+  }, [title, onSave, onClose])
 
-  const setSubtask = useCallback((i: number, val: string) => {
+  const handleSave = useCallback(async () => {
+    await save(subtasks)
+  }, [save, subtasks])
+
+  const handleToggleSubtask = useCallback(async (i: number) => {
+    const next = subtasks.map((s, idx) =>
+      idx === i ? { ...s, completed: !s.completed } : s
+    )
+    setSubtasks(next)
+    // Save immediately in view mode
+    setSaving(true)
+    try {
+      const content = serializeSubtasks(next)
+      await onSave({ title: title.trim(), content })
+      // Check auto-complete
+      if (next.every((s) => s.completed)) {
+        onClose()
+      }
+    } finally {
+      setSaving(false)
+    }
+  }, [subtasks, title, onSave, onClose])
+
+  const setSubtaskText = useCallback((i: number, val: string) => {
     setSubtasks((prev) => {
       const next = [...prev]
-      next[i] = val
+      next[i] = { ...next[i], text: val }
       return next
     })
   }, [])
@@ -70,7 +111,7 @@ export function TodoDialog({ mode: initialMode, todo, open, onClose, onSave }: T
   const addSubtask = useCallback(() => {
     setSubtasks((prev) => {
       if (prev.length >= MAX_SUBTASKS) return prev
-      return [...prev, '']
+      return [...prev, { text: '', completed: false }]
     })
   }, [])
 
@@ -129,17 +170,35 @@ export function TodoDialog({ mode: initialMode, todo, open, onClose, onSave }: T
           {isView && todo ? (
             <div className="space-y-3">
               <h2 className="text-base font-semibold text-foreground/90">{todo.title}</h2>
-              {todo.content ? (
+              {subtasks.length > 0 ? (
                 <div className="space-y-1.5">
-                  {todo.content.split('\n').filter(Boolean).map((line, i) => (
-                    <div key={i} className="flex items-start gap-2 text-sm text-foreground/70">
-                      <input
-                        type="checkbox"
-                        checked={false}
-                        readOnly
-                        className="mt-1 w-3.5 h-3.5 rounded border-border/60 accent-foreground shrink-0"
-                      />
-                      <span>{line}</span>
+                  {subtasks.map((st, i) => (
+                    <div key={i} className="flex items-start gap-2">
+                      <button
+                        onClick={() => handleToggleSubtask(i)}
+                        className={cn(
+                          'mt-1 w-3.5 h-3.5 rounded border shrink-0 transition-colors flex items-center justify-center',
+                          st.completed
+                            ? 'bg-foreground/20 border-foreground/20'
+                            : 'border-border/60 hover:border-foreground/30'
+                        )}
+                      >
+                        {st.completed && (
+                          <svg className="w-2 h-2 text-foreground/60" viewBox="0 0 16 16" fill="none">
+                            <path d="M3 8l3 3 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        )}
+                      </button>
+                      <span
+                        className={cn(
+                          'text-sm flex-1',
+                          st.completed
+                            ? 'text-muted-foreground/30 line-through'
+                            : 'text-foreground/70'
+                        )}
+                      >
+                        {st.text}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -170,8 +229,8 @@ export function TodoDialog({ mode: initialMode, todo, open, onClose, onSave }: T
                     </span>
                     <input
                       type="text"
-                      value={st}
-                      onChange={(e) => setSubtask(i, e.target.value)}
+                      value={st.text}
+                      onChange={(e) => setSubtaskText(i, e.target.value)}
                       placeholder={`${t.subtaskPlaceholder} ${i + 1}`}
                       onKeyDown={handleKeyDown}
                       className="flex-1 bg-transparent border border-border/30 rounded-lg px-2 py-1.5 text-sm text-foreground/70 placeholder:text-muted-foreground/25 focus:outline-none focus:border-foreground/20 transition-colors"
