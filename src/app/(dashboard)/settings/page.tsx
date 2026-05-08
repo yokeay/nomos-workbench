@@ -8,7 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { User, Palette, Globe, Key, HardDrive, Save, Server, Terminal as TerminalIcon, LogIn, Filter, AlertTriangle } from 'lucide-react';
+import { User, Palette, Globe, Key, HardDrive, Save, Server, Terminal as TerminalIcon, LogIn, Filter, AlertTriangle, Search, Plus, X, Pencil, Trash2 } from 'lucide-react';
+import { DEFAULT_SEARCH_ENGINES, type SearchEngine } from '@/lib/search-engines';
 import { sources } from '@/lib/newsnow/sources';
 import { useNewsFilterStore, batchPersist, deselectAllSources } from '@/stores/news-filter';
 
@@ -199,6 +200,22 @@ export default function SettingsPage() {
           </CardHeader>
           <CardContent>
             <TerminalManager />
+          </CardContent>
+        </Card>
+
+        {/* Search Engines */}
+        <Card className="bg-card/60 border-border/60 shadow-sm-soft rounded-2xl">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base font-semibold flex items-center gap-2">
+              <Search className="w-4 h-4 text-foreground/50" />
+              {t('settings:searchEngines')}
+            </CardTitle>
+            <CardDescription className="text-xs text-muted-foreground/70">
+              {t('settings:searchEnginesDesc')}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <SearchEngineManager />
           </CardContent>
         </Card>
 
@@ -739,6 +756,260 @@ function TerminalManager() {
       >
         {saving ? t('settings:saving') : t('settings:save')}
       </Button>
+    </div>
+  );
+}
+
+function SearchEngineManager() {
+  const { t } = useTranslation();
+  const { isLoggedIn } = useAuth();
+  const toast = useToast();
+  const [customEngines, setCustomEngines] = useState<SearchEngine[]>([]);
+  const [newName, setNewName] = useState('');
+  const [newUrl, setNewUrl] = useState('');
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editUrl, setEditUrl] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/settings/preferences')
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.code === 0 && d.data?.searchEngines) {
+          try {
+            const parsed: SearchEngine[] = JSON.parse(d.data.searchEngines);
+            setCustomEngines(parsed);
+          } catch { /* */ }
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoaded(true));
+  }, []);
+
+  const persistEngines = async (engines: SearchEngine[]) => {
+    setSaving(true);
+    try {
+      const res = await fetch('/api/settings/preferences', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ searchEngines: JSON.stringify(engines) }),
+      });
+      const d = await res.json();
+      if (d.code === 0) {
+        setCustomEngines(engines);
+        toast.success(t('common:success') as string);
+      } else {
+        toast.error(d.message || (t('common:error') as string));
+      }
+    } catch {
+      toast.error(t('common:error') as string);
+    }
+    setSaving(false);
+  };
+
+  const handleAdd = () => {
+    const name = newName.trim();
+    const url = newUrl.trim();
+    if (!name || !url) return;
+    if (!url.includes('{query}')) {
+      toast.error('URL 模板必须包含 {query} 占位符');
+      return;
+    }
+    const engine: SearchEngine = {
+      id: `custom-${Date.now()}`,
+      name,
+      urlTemplate: url,
+      isDefault: false,
+    };
+    persistEngines([...customEngines, engine]);
+    setNewName('');
+    setNewUrl('');
+  };
+
+  const handleDelete = (id: string) => {
+    persistEngines(customEngines.filter((e) => e.id !== id));
+  };
+
+  const startEdit = (engine: SearchEngine) => {
+    setEditingId(engine.id);
+    setEditName(engine.name);
+    setEditUrl(engine.urlTemplate);
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditName('');
+    setEditUrl('');
+  };
+
+  const handleSaveEdit = () => {
+    const name = editName.trim();
+    const url = editUrl.trim();
+    if (!name || !url) return;
+    if (!url.includes('{query}')) {
+      toast.error('URL 模板必须包含 {query} 占位符');
+      return;
+    }
+    persistEngines(
+      customEngines.map((e) =>
+        e.id === editingId ? { ...e, name, urlTemplate: url } : e
+      )
+    );
+    cancelEdit();
+  };
+
+  if (!loaded) return null;
+
+  return (
+    <div className="space-y-4">
+      {/* Default engines */}
+      <div>
+        <label className="text-xs font-medium text-muted-foreground block mb-2">
+          {t('settings:searchEngineDefault')}
+        </label>
+        <div className="flex flex-wrap gap-1.5">
+          {DEFAULT_SEARCH_ENGINES.map((engine) => (
+            <span
+              key={engine.id}
+              className="text-[11px] px-2.5 py-1 rounded-full bg-muted/40 border border-border/30 text-muted-foreground/60"
+            >
+              {engine.name}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* Custom engines list */}
+      {customEngines.length > 0 && (
+        <div>
+          <label className="text-xs font-medium text-muted-foreground block mb-2">
+            {t('settings:searchEngineCustom')}
+          </label>
+          <div className="space-y-1.5">
+            {customEngines.map((engine) => (
+              <div
+                key={engine.id}
+                className="flex items-center justify-between p-2.5 rounded-xl bg-muted/30 border border-border/30"
+              >
+                {editingId === engine.id ? (
+                  <div className="flex-1 space-y-2">
+                    <Input
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      placeholder={t('settings:searchEngineName')}
+                      className="h-8 bg-muted/50 border-border/60 rounded-lg text-xs"
+                    />
+                    <Input
+                      value={editUrl}
+                      onChange={(e) => setEditUrl(e.target.value)}
+                      placeholder="https://example.com/search?q={query}"
+                      className="h-8 bg-muted/50 border-border/60 rounded-lg text-xs"
+                    />
+                    <div className="flex gap-1.5">
+                      <Button
+                        onClick={handleSaveEdit}
+                        disabled={saving}
+                        size="sm"
+                        className="h-7 px-3 rounded-lg text-[10px]"
+                      >
+                        {t('settings:save')}
+                      </Button>
+                      <Button
+                        onClick={cancelEdit}
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 px-3 rounded-lg text-[10px]"
+                      >
+                        {t('common:cancel')}
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex-1 min-w-0">
+                      <span className="text-xs font-medium text-foreground/80 block truncate">
+                        {engine.name}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground/40 block truncate">
+                        {engine.urlTemplate}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1 ml-2 shrink-0">
+                      <button
+                        onClick={() => startEdit(engine)}
+                        disabled={!isLoggedIn || saving}
+                        className="p-1.5 rounded-lg hover:bg-accent/50 transition-colors disabled:opacity-30"
+                      >
+                        <Pencil className="w-3 h-3 text-muted-foreground/60" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(engine.id)}
+                        disabled={!isLoggedIn || saving}
+                        className="p-1.5 rounded-lg hover:bg-destructive/10 transition-colors disabled:opacity-30"
+                      >
+                        <Trash2 className="w-3 h-3 text-destructive/60" />
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {customEngines.length === 0 && (
+        <p className="text-[10px] text-muted-foreground/40">{t('settings:searchEngineEmpty')}</p>
+      )}
+
+      {/* Add form */}
+      <div className="space-y-2 pt-2 border-t border-border/20">
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <label className="text-[10px] font-medium text-muted-foreground block mb-1">
+              {t('settings:searchEngineName')}
+            </label>
+            <Input
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              disabled={!isLoggedIn || saving}
+              placeholder="Example"
+              className="h-8 bg-muted/50 border-border/60 rounded-lg text-xs"
+            />
+          </div>
+          <div>
+            <label className="text-[10px] font-medium text-muted-foreground block mb-1">
+              {t('settings:searchEngineUrl')}
+            </label>
+            <Input
+              value={newUrl}
+              onChange={(e) => setNewUrl(e.target.value)}
+              disabled={!isLoggedIn || saving}
+              placeholder="https://example.com/search?q={query}"
+              className="h-8 bg-muted/50 border-border/60 rounded-lg text-xs"
+            />
+          </div>
+        </div>
+        <p className="text-[10px] text-muted-foreground/40">{t('settings:searchEngineUrlHelp')}</p>
+        <Button
+          onClick={handleAdd}
+          disabled={!isLoggedIn || saving || !newName.trim() || !newUrl.trim()}
+          size="sm"
+          className="rounded-lg h-8 px-3 text-xs gap-1.5"
+        >
+          <Plus className="w-3 h-3" />
+          {t('settings:searchEngineAdd')}
+        </Button>
+      </div>
+
+      {!isLoggedIn && (
+        <p className="text-[10px] text-muted-foreground/40 flex items-center gap-1">
+          <LogIn className="w-3 h-3" />
+          请先登录后管理搜索引擎
+        </p>
+      )}
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { VERSION } from '@/constants/version';
 import { Search, Command, Clock } from 'lucide-react';
 import { WeatherWidget } from '@/components/weather/weather-widget';
+import { SearchPanel } from '@/components/search/search-panel';
 
 
 function getTimeString(tz: string) {
@@ -202,20 +203,27 @@ export function Header() {
 
       {/* Right: Search */}
       <div className="flex items-center gap-4 flex-shrink-0">
-        <div className="relative group">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground/40 pointer-events-none transition-colors group-hover:text-muted-foreground/60" />
-          <input
-            ref={searchRef}
-            type="search"
-            placeholder={t('header:search')}
-            className="w-48 h-8 pl-8 pr-8 bg-muted/60 border border-transparent text-sm text-foreground placeholder:text-muted-foreground/40 rounded-lg transition-all duration-normal focus:outline-none focus:bg-input-background focus:border-border focus:ring-1 focus:ring-ring/20 focus:w-80"
-            onFocus={() => setSearchFocused(true)}
-            onBlur={() => setSearchFocused(false)}
-          />
-          <div className="absolute right-2 top-1/2 -translate-y-1/2 hidden sm:flex items-center gap-0.5 text-muted-foreground/30 text-[10px] pointer-events-none">
-            <Command className="w-2.5 h-2.5" />
-            <span>K</span>
+        <div className="relative">
+          <div className="relative group">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground/40 pointer-events-none transition-colors group-hover:text-muted-foreground/60" />
+            <input
+              ref={searchRef}
+              type="search"
+              placeholder={t('header:search')}
+              className={`w-48 h-8 pl-8 pr-8 bg-muted/60 border border-transparent text-sm text-foreground placeholder:text-muted-foreground/40 rounded-lg transition-all duration-normal focus:outline-none focus:bg-input-background focus:border-border focus:ring-1 focus:ring-ring/20 ${searchFocused ? 'w-80' : ''}`}
+              onFocus={() => setSearchFocused(true)}
+              onBlur={() => setTimeout(() => setSearchFocused(false), 200)}
+            />
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 hidden sm:flex items-center gap-0.5 text-muted-foreground/30 text-[10px] pointer-events-none">
+              <Command className="w-2.5 h-2.5" />
+              <span>K</span>
+            </div>
           </div>
+          <SearchPanel
+            open={searchFocused}
+            onClose={() => setSearchFocused(false)}
+            inputRef={searchRef}
+          />
         </div>
       </div>
     </header>

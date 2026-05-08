@@ -7,6 +7,7 @@ export interface UserPreferences {
   terminalWsUrl?: string;
   storageProvider?: string;
   storageConfig?: string;
+  searchEngines?: string;
 }
 
 export async function fetchPreferences(): Promise<UserPreferences | null> {

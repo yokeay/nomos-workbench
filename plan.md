@@ -76,6 +76,7 @@
 - [x] 设置页面偏好 API 重构：StorageManager/TerminalManager/NewsFilterManager ✅ 2026-05-08
 - [x] 哔哩哔哩子源标注 + 新闻过滤保存按钮 ✅ 2026-05-08
 - [x] 自定义 API 供应商：自定义 Base URL + 密钥 + 模型列表刷新 + 模型选择器动态加载 ✅ 2026-05-08
+- [x] 搜索增强：SearchPanel 下拉面板 + 搜索引擎切换 + 标签实时过滤 + Settings 搜索引擎配置卡片 ✅ 2026-05-08
 
 ---
 

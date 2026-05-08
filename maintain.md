@@ -1,5 +1,34 @@
 # NOMOS Workbench - 版本迭代记录
 
+## v0.2.8 - 2026-05-08
+
+### 变更内容
+- **搜索增强**：Header 搜索框从纯装饰升级为完整功能入口
+  - **SearchPanel 下拉面板**：Cmd+K 或点击聚焦后弹出，支持键盘导航（↑↓ 选择/Enter 打开/Esc 关闭/外部点击关闭）
+  - **搜索引擎切换**：支持 Google/Bing/Baidu/DuckDuckGo/GitHub/Bilibili 6 个默认引擎，输入关键词按 Enter 在新标签页打开搜索结果
+  - **自定义搜索引擎**：登录后从 `/api/settings/preferences` 加载用户自定义引擎，与默认引擎合并显示
+  - **标签搜索**：实时过滤 90+ 标签（名称/描述匹配），点击标签在新标签页打开对应 URL
+- **搜索引擎配置卡片**：设置页面新增「搜索引擎」卡片（SearchEngineManager），展示默认引擎（只读），支持添加/编辑/删除自定义搜索引擎，URL 模板使用 `{query}` 占位符
+- **i18n 翻译补充**：新增搜索引擎相关翻译 key（searchEngines/searchEngineName/searchEngineUrl 等，zh/en）
+
+### 影响范围
+- Header 搜索框交互：从纯视觉占位变为功能入口，触发 SearchPanel 下拉面板
+- 设置页面：新增搜索引擎配置卡片（SearchEngineManager）
+- 数据库：`nomos_dev_user_settings` 表新增 `search_engines` 列（migration 0006）
+- API：`/api/settings/preferences` GET/PUT 增加 searchEngines 字段
+- i18n：settings namespace 新增 10 个翻译 key
+
+### 修改/新增文件
+- `src/components/search/search-panel.tsx` — 新建，搜索下拉面板主组件
+- `src/lib/search-engines.ts` — 新建，搜索引擎常量（SearchEngine 接口/DEFAULT_SEARCH_ENGINES/buildSearchUrl）
+- `src/components/layout/header.tsx` — 集成 SearchPanel，搜索框 onFocus/onBlur 状态管理
+- `src/app/(dashboard)/settings/page.tsx` — 新增 SearchEngineManager 组件 + 卡片
+- `src/app/api/settings/preferences/route.ts` — GET/PUT 增加 searchEngines 字段
+- `src/lib/preferences-client.ts` — UserPreferences 接口新增 searchEngines 字段
+- `src/lib/db/schema.ts` — userSettings 表新增 search_engines 列
+- `drizzle/0006_search_engines.sql` — 新建，ALTER TABLE 添加 search_engines 列
+- `src/i18n/config.ts` — settings namespace 新增搜索引擎翻译 key
+
 ## v0.2.7 - 2026-05-08
 
 ### 变更内容

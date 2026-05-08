@@ -10,6 +10,7 @@ const DEFAULTS = {
   terminalWsUrl: '',
   storageProvider: 'local',
   storageConfig: '{}',
+  searchEngines: '[]',
 };
 
 export async function GET() {
@@ -53,6 +54,7 @@ export async function GET() {
         terminalWsUrl: row.terminalWsUrl,
         storageProvider: row.storageProvider,
         storageConfig: JSON.stringify(sc),
+        searchEngines: row.searchEngines ?? DEFAULTS.searchEngines,
       },
     });
   } catch (error) {
@@ -94,6 +96,7 @@ export async function PUT(request: NextRequest) {
       terminalWsUrl: body.terminalWsUrl ?? existing?.terminalWsUrl ?? DEFAULTS.terminalWsUrl,
       storageProvider: body.storageProvider ?? existing?.storageProvider ?? DEFAULTS.storageProvider,
       storageConfig: typeof sc === 'string' ? sc : (existing?.storageConfig ?? DEFAULTS.storageConfig),
+      searchEngines: body.searchEngines ?? existing?.searchEngines ?? DEFAULTS.searchEngines,
       updatedAt: now,
     };
 

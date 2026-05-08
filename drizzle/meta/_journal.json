@@ -29,6 +29,13 @@
       "when": 1778138301870,
       "tag": "0003_adorable_stone_men",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1778250500331,
+      "tag": "0006_search_engines",
+      "breakpoints": true
     }
   ]
 }

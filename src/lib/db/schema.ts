@@ -218,6 +218,7 @@ export const userSettings = sqliteTable(`${BUSINESS_PREFIX}user_settings`, {
   terminalWsUrl: text('terminal_ws_url').notNull().default(''),
   storageProvider: text('storage_provider').notNull().default('local'),
   storageConfig: text('storage_config').notNull().default('{}'),
+  searchEngines: text('search_engines').notNull().default('[]'),
   createdAt: integer('created_at').notNull(),
   updatedAt: integer('updated_at').notNull(),
 });
