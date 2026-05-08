@@ -8,9 +8,9 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { User, Palette, Globe, Key, HardDrive, Save, Server, Terminal as TerminalIcon, LogIn, Filter } from 'lucide-react';
+import { User, Palette, Globe, Key, HardDrive, Save, Server, Terminal as TerminalIcon, LogIn, Filter, AlertTriangle } from 'lucide-react';
 import { sources } from '@/lib/newsnow/sources';
-import { useNewsFilterStore, deselectAllSources } from '@/stores/news-filter';
+import { useNewsFilterStore, batchPersist, deselectAllSources } from '@/stores/news-filter';
 
 export default function SettingsPage() {
   const { t } = useTranslation();
@@ -377,20 +377,21 @@ function StorageManager() {
   const toast = useToast();
 
   useEffect(() => {
-    fetch('/api/settings/storage')
+    fetch('/api/settings/preferences')
       .then((r) => r.json())
       .then((d) => {
         if (d.code === 0 && d.data) {
-          setProvider(d.data.provider || 'local');
-          const c = d.data.config || {};
-          if (d.data.provider === 's3') {
+          setProvider(d.data.storageProvider || 'local');
+          let c: any = {};
+          try { c = JSON.parse(d.data.storageConfig || '{}'); } catch { /* */ }
+          if (d.data.storageProvider === 's3') {
             setS3Endpoint(c.endpoint || '');
             setS3Region(c.region || '');
             setS3Bucket(c.bucket || '');
             setS3AccessKey(c.accessKey || '');
             setS3SecretKey(c.secretKey || '');
             setS3PublicUrl(c.publicUrl || '');
-          } else if (d.data.provider === 'dufs') {
+          } else if (d.data.storageProvider === 'dufs') {
             setDufsUrl(c.serverUrl || '');
             setDufsKey(c.authKey || '');
           }
@@ -409,10 +410,10 @@ function StorageManager() {
         config = { serverUrl: dufsUrl, authKey: dufsKey };
       }
 
-      const res = await fetch('/api/settings/storage', {
+      const res = await fetch('/api/settings/preferences', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ provider, config }),
+        body: JSON.stringify({ storageProvider: provider, storageConfig: JSON.stringify(config) }),
       });
       const d = await res.json();
       if (d.code === 0) toast.success(t('common:success') as string);
@@ -568,17 +569,39 @@ function TerminalManager() {
   const { isLoggedIn } = useAuth();
   const [wsUrl, setWsUrl] = useState('');
   const [initialized, setInitialized] = useState(false);
+  const [saving, setSaving] = useState(false);
   const toast = useToast();
 
   useEffect(() => {
-    const stored = localStorage.getItem('nomos_terminal_ws_url');
-    if (stored) setWsUrl(stored);
-    setInitialized(true);
+    fetch('/api/settings/preferences')
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.code === 0 && d.data?.terminalWsUrl) {
+          setWsUrl(d.data.terminalWsUrl);
+        } else {
+          const stored = localStorage.getItem('nomos_terminal_ws_url');
+          if (stored) setWsUrl(stored);
+        }
+      })
+      .catch(() => {
+        const stored = localStorage.getItem('nomos_terminal_ws_url');
+        if (stored) setWsUrl(stored);
+      })
+      .finally(() => setInitialized(true));
   }, []);
 
-  const handleSave = () => {
-    localStorage.setItem('nomos_terminal_ws_url', wsUrl.trim() || '');
-    toast.success(t('common:success') as string);
+  const handleSave = async () => {
+    setSaving(true);
+    const url = wsUrl.trim() || '';
+    localStorage.setItem('nomos_terminal_ws_url', url);
+    const ok = await fetch('/api/settings/preferences', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ terminalWsUrl: url }),
+    }).then(r => r.json()).then(d => d.code === 0).catch(() => false);
+    if (ok) toast.success(t('common:success') as string);
+    else toast.error(t('common:error') as string);
+    setSaving(false);
   };
 
   if (!initialized) return null;
@@ -604,10 +627,10 @@ function TerminalManager() {
       )}
       <Button
         onClick={handleSave}
-        disabled={!isLoggedIn}
+        disabled={!isLoggedIn || saving}
         className="rounded-xl h-9 px-4 text-sm font-medium transition-all duration-normal"
       >
-        {t('settings:save')}
+        {saving ? t('settings:saving') : t('settings:save')}
       </Button>
     </div>
   );
@@ -715,14 +738,48 @@ const COLUMN_LABELS: Record<string, string> = {
 
 function NewsFilterManager() {
   const { t } = useTranslation()
-  const { disabledSourceIds, toggleSource, selectAll } = useNewsFilterStore()
+  const store = useNewsFilterStore()
+  const toast = useToast()
   const [mounted, setMounted] = useState(false)
+  const [localDisabled, setLocalDisabled] = useState<Set<string>>(new Set())
+  const [serverDisabled, setServerDisabled] = useState<Set<string>>(new Set())
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => { setMounted(true) }, [])
+
+  // Load from server on mount, fall back to store
+  useEffect(() => {
+    if (!mounted) return
+    fetch('/api/settings/preferences')
+      .then(r => r.json())
+      .then(d => {
+        if (d.code === 0 && d.data?.newsFilter) {
+          try {
+            const arr = JSON.parse(d.data.newsFilter)
+            if (Array.isArray(arr)) {
+              const s = new Set(arr)
+              setLocalDisabled(s)
+              setServerDisabled(s)
+              return
+            }
+          } catch { /* */ }
+        }
+        // Fall back to store
+        const fromStore = new Set(store.disabledSourceIds)
+        setLocalDisabled(fromStore)
+        setServerDisabled(fromStore)
+      })
+      .catch(() => {
+        const fromStore = new Set(store.disabledSourceIds)
+        setLocalDisabled(fromStore)
+        setServerDisabled(fromStore)
+      })
+  }, [mounted])
 
   if (!mounted) return null
 
   const allIDs = Array.from(sources.keys())
+  const hasChanges = !setsEqual(localDisabled, serverDisabled)
 
   // Group by column
   const groups: Record<string, typeof allIDs> = { other: [] }
@@ -734,7 +791,27 @@ function NewsFilterManager() {
     groups[key].push(id)
   }
 
-  const enabledCount = allIDs.filter((id) => !disabledSourceIds.has(id)).length
+  const enabledCount = allIDs.filter((id) => !localDisabled.has(id)).length
+
+  const toggleLocal = (id: string) => {
+    setLocalDisabled((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  const selectAllLocal = () => setLocalDisabled(new Set())
+  const deselectAllLocal = () => setLocalDisabled(new Set(allIDs))
+
+  const handleSave = () => {
+    setSaving(true)
+    batchPersist(localDisabled)
+    setServerDisabled(new Set(localDisabled))
+    toast.success(t('common:success') as string)
+    setSaving(false)
+  }
 
   return (
     <div className="space-y-3">
@@ -745,13 +822,13 @@ function NewsFilterManager() {
         </span>
         <div className="flex gap-1.5">
           <button
-            onClick={selectAll}
+            onClick={selectAllLocal}
             className="text-[10px] px-2 py-1 rounded-lg bg-muted/50 border border-border/40 text-muted-foreground/70 hover:text-foreground/80 transition-colors"
           >
             {t('settings:newsFilterSelectAll')}
           </button>
           <button
-            onClick={() => deselectAllSources(allIDs)}
+            onClick={deselectAllLocal}
             className="text-[10px] px-2 py-1 rounded-lg bg-muted/50 border border-border/40 text-muted-foreground/70 hover:text-foreground/80 transition-colors"
           >
             {t('settings:newsFilterDeselectAll')}
@@ -772,11 +849,11 @@ function NewsFilterManager() {
               {ids.map((id) => {
                 const meta = sources.get(id)
                 const name = meta?.definition.name || id
-                const enabled = !disabledSourceIds.has(id)
+                const enabled = !localDisabled.has(id)
                 return (
                   <button
                     key={id}
-                    onClick={() => toggleSource(id)}
+                    onClick={() => toggleLocal(id)}
                     className={`
                       text-[10px] px-2.5 py-1 rounded-full border transition-all duration-fast
                       ${enabled
@@ -793,6 +870,30 @@ function NewsFilterManager() {
           </div>
         )
       })}
+
+      {/* Unsaved changes indicator */}
+      {hasChanges && (
+        <div className="flex items-center gap-1.5 text-[11px] text-amber-500/80">
+          <AlertTriangle className="w-3 h-3" />
+          有未保存的更改
+        </div>
+      )}
+
+      {/* Save button */}
+      <Button
+        onClick={handleSave}
+        disabled={saving || !hasChanges}
+        className="rounded-xl h-9 px-4 text-sm font-medium transition-all duration-normal gap-2"
+      >
+        <Save className="w-3.5 h-3.5" />
+        {saving ? '保存中...' : '保存更改'}
+      </Button>
     </div>
   )
+}
+
+function setsEqual(a: Set<string>, b: Set<string>) {
+  if (a.size !== b.size) return false
+  for (const x of a) if (!b.has(x)) return false
+  return true
 }

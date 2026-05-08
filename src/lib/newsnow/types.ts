@@ -37,4 +37,5 @@ export interface SourceDefinition {
   disable?: boolean | "cf"
   redirect?: string
   priority?: number
+  subNames?: Record<string, string>
 }

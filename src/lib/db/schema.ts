@@ -207,7 +207,21 @@ export const memoAttachments = sqliteTable(`${BUSINESS_PREFIX}memo_attachments`,
   createdAt: integer('created_at').notNull(),
 });
 
-// Storage configuration
+// User preferences (per-user settings)
+export const userSettings = sqliteTable(`${BUSINESS_PREFIX}user_settings`, {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: text('user_id').notNull().unique().references(() => users.id),
+  theme: text('theme').notNull().default('dark'),
+  locale: text('locale').notNull().default('zh'),
+  newsFilter: text('news_filter').notNull().default('[]'),
+  terminalWsUrl: text('terminal_ws_url').notNull().default(''),
+  storageProvider: text('storage_provider').notNull().default('local'),
+  storageConfig: text('storage_config').notNull().default('{}'),
+  createdAt: integer('created_at').notNull(),
+  updatedAt: integer('updated_at').notNull(),
+});
+
+// Storage configuration (deprecated — merged into user_settings)
 export const storageConfig = sqliteTable(`${BUSINESS_PREFIX}storage_config`, {
   id: integer('id').primaryKey({ autoIncrement: true }),
   provider: text('provider').notNull().default('local'),
@@ -296,6 +310,9 @@ export type NewMemoAttachment = typeof memoAttachments.$inferInsert;
 
 export type StorageConfig = typeof storageConfig.$inferSelect;
 export type NewStorageConfig = typeof storageConfig.$inferInsert;
+
+export type UserSettings = typeof userSettings.$inferSelect;
+export type NewUserSettings = typeof userSettings.$inferInsert;
 
 export type Todo = typeof todos.$inferSelect;
 export type NewTodo = typeof todos.$inferInsert;

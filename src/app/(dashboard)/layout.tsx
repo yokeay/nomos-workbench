@@ -2,6 +2,7 @@ import { AuthProvider } from '@/components/auth-provider'
 import { Header } from '@/components/layout/header';
 import { Sidebar } from '@/components/layout/sidebar';
 import { TimelinePanel } from '@/components/layout/timeline-panel';
+import { SettingsInit } from '@/components/settings-init';
 
 export default function DashboardLayout({
   children,
@@ -10,6 +11,7 @@ export default function DashboardLayout({
 }) {
   return (
     <AuthProvider>
+      <SettingsInit />
       <div className="h-screen flex flex-col overflow-hidden">
         {/* Header */}
         <Header />

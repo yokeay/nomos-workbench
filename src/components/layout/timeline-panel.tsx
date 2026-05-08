@@ -384,10 +384,19 @@ function NewsTimeline() {
 
   // Set initial cache
   const setInitialCache = useCallback((items: any[]) => {
-    for (const item of items) {
+    const filtered = items.filter((item: any) => {
+      if (!useNewsFilterStore.getState().isEnabled(item.sourceId)) return false;
+      const pd = item.pubDate;
+      if (pd && pd !== 0) {
+        const ts = typeof pd === 'string' ? Date.parse(pd) : pd;
+        if (ts && !isNaN(ts) && ts !== 0 && Date.now() - ts > 24 * 60 * 60 * 1000) return false;
+      }
+      return true;
+    });
+    for (const item of filtered) {
       seenRef.current.add(itemKey(item));
     }
-    allItemsRef.current = sortDesc(items);
+    allItemsRef.current = sortDesc(filtered);
 
     // Try to restore from localStorage
     const restored = restoreRevealed();
@@ -472,6 +481,36 @@ function NewsTimeline() {
       if (revealTimerRef.current) clearInterval(revealTimerRef.current);
     };
   }, []);
+
+  // Re-filter when news filter changes (user saves new channel selections)
+  const filterVersion = useNewsFilterStore((s) => s.filterVersion);
+  useEffect(() => {
+    if (filterVersion === 0) return; // skip initial mount
+    const all = allItemsRef.current;
+    if (all.length === 0) return;
+
+    const isEnabled = useNewsFilterStore.getState().isEnabled;
+    const filtered = all.filter((item: any) => isEnabled(item.sourceId));
+    allItemsRef.current = filtered;
+
+    // Update seenRef to match
+    const filteredKeys = new Set(filtered.map((item: any) => itemKey(item)));
+    seenRef.current = filteredKeys;
+
+    // Re-filter displayItems
+    setDisplayItems((prev) => prev.filter((item: any) => isEnabled(item.sourceId)));
+
+    // Adjust revealIndex: count items in filtered that were already revealed
+    revealIndexRef.current = Math.min(revealIndexRef.current, filtered.length);
+
+    // Persist updated state
+    saveState();
+
+    // If reveal timer was stopped, restart it
+    if (revealIndexRef.current < filtered.length && !revealTimerRef.current) {
+      revealTimerRef.current = setInterval(revealNextAnimated, 6000);
+    }
+  }, [filterVersion]);
 
   if (loading) return <TimelineSkeleton />;
 

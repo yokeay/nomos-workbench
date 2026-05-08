@@ -71,6 +71,10 @@
 - [x] 数据库备份策略实现 ✅
 - [x] 添加版本号规范（package.json + maintain.md） ✅
 - [ ] 配置提交规范（commitlint）
+- [x] 用户设置整合：user_settings 表 + preferences API + 前端 stores 重构 ✅ 2026-05-08
+- [x] 新闻过滤修复：setInitialCache 应用 isEnabled 过滤 ✅ 2026-05-08
+- [x] 设置页面偏好 API 重构：StorageManager/TerminalManager/NewsFilterManager ✅ 2026-05-08
+- [x] 哔哩哔哩子源标注 + 新闻过滤保存按钮 ✅ 2026-05-08
 
 ---
 

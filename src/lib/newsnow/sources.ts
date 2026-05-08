@@ -157,7 +157,7 @@ function buildSources(): Map<string, SourceMeta> {
       getter: github,
     },
     bilibili: {
-      meta: { name: "哔哩哔哩", color: "blue", home: "https://www.bilibili.com" },
+      meta: { name: "哔哩哔哩", color: "blue", home: "https://www.bilibili.com", subNames: { "bilibili-hot-search": "哔哩哔哩 · 热搜", "bilibili-hot-video": "哔哩哔哩 · 热门", "bilibili-ranking": "哔哩哔哩 · 排行榜" } },
       getter: bilibili,
     },
     kaopu: {
@@ -239,7 +239,8 @@ function buildSources(): Map<string, SourceMeta> {
     } else {
       // Multi-sub-source: getter is an object like { "cls-telegraph": fn, "cls-depth": fn }
       for (const [subId, subGetter] of Object.entries(getter)) {
-        map.set(subId, { getter: subGetter, definition: { ...meta, title: undefined } })
+        const subName = meta.subNames?.[subId]
+        map.set(subId, { getter: subGetter, definition: { ...meta, title: undefined, ...(subName ? { name: subName } : {}) } })
       }
     }
   }

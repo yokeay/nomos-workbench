@@ -1,5 +1,39 @@
 # NOMOS Workbench - 版本迭代记录
 
+## v0.2.7 - 2026-05-08
+
+### 变更内容
+- **用户设置整合**：所有用户设置统一归档到 `nomos_dev_user_settings` 表，关联用户 ID，登录后自动同步
+  - 合并项：主题(theme)、语言(locale)、新闻过滤(newsFilter)、终端WS地址(terminalWsUrl)、存储配置(storageProvider/storageConfig)
+  - 新增 `/api/settings/preferences` GET/PUT 端点，支持部分更新和敏感密钥遮罩(••••)
+  - 弃用 `nomos_dev_storage_config` 全局存储配置表（已合并入 user_settings）
+- **新闻过滤修复**：`setInitialCache` 首次加载历史数据时也应用过滤规则，修复页面刷新/首次打开时被禁用的渠道仍显示数据的问题
+- **商店持久化**：useSettingsStore(theme/locale) 和 useNewsFilterStore(newsFilter) 变更时同步保存到服务端
+- **设置页面重构**：StorageManager、TerminalManager、NewsFilterManager 改为从 `/api/settings/preferences` 加载/保存
+- **哔哩哔哩子源标注**：3个子源分别显示为"哔哩哔哩 · 热搜""哔哩哔哩 · 热门""哔哩哔哩 · 排行榜"
+- **新闻渠道过滤保存按钮**：本地编辑状态 + 保存按钮 + 未保存提示 + Toast 反馈
+- **新闻过滤即时生效**：新增 filterVersion 计数器，保存过滤设置后即时重新过滤已显示的条目，被禁用渠道的文章立即从屏幕上消失，无需刷新页面
+
+### 影响范围
+- 数据库：新增 `nomos_dev_user_settings` 表（migration 0004），保留 `nomos_dev_storage_config` 表仅作向后兼容
+- API：新增 `/api/settings/preferences`，Storage 设置改为从此端点读写
+- 前端：SettingsInit 组件在登录后自动加载用户偏好设置
+
+### 修改/新增文件
+- `src/lib/db/schema.ts` — 新增 userSettings 表定义 + 类型导出
+- `drizzle/0004_user_settings.sql` — 新建，创建 user_settings 表并迁移 users 表 theme 数据
+- `src/app/api/settings/preferences/route.ts` — 新建，GET/PUT 用户偏好设置
+- `src/lib/preferences-client.ts` — 新建，前端偏好设置 API 客户端
+- `src/components/settings-init.tsx` — 新建，登录后自动加载服务端偏好
+- `src/stores/index.ts` — setTheme/setLocale 增加 API 持久化
+- `src/stores/news-filter.ts` — loadFromServer + batchPersist API 持久化
+- `src/components/layout/timeline-panel.tsx` — setInitialCache 增加 isEnabled 过滤 + 24h 滑动窗口
+- `src/app/(dashboard)/settings/page.tsx` — StorageManager/TerminalManager/NewsFilterManager 改用 preferences API
+- `src/app/(dashboard)/layout.tsx` — 加入 SettingsInit 组件
+- `src/lib/newsnow/types.ts` — SourceDefinition 新增 subNames 字段
+- `src/lib/newsnow/sources.ts` — buildSources 支持 subNames + 哔哩哔哩子源标注
+
+
 ## v0.2.6 - 2026-05-07
 
 ### 变更内容

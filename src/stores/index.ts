@@ -4,6 +4,7 @@ import { create } from 'zustand';
 import { Message, ChatSession } from '@/types/ai';
 import type { Locale } from '@/i18n/config';
 import i18n from '@/lib/i18n';
+import { savePreferences } from '@/lib/preferences-client';
 
 interface ChatState {
   currentSessionId: string | null;
@@ -131,6 +132,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
         document.documentElement.classList.remove('dark');
       }
     }
+    savePreferences({ theme });
   },
 
   toggleTheme: () =>
@@ -154,5 +156,6 @@ export const useSettingsStore = create<SettingsState>((set) => ({
       localStorage.setItem('nomos_locale', locale);
     }
     i18n.changeLanguage(locale);
+    savePreferences({ locale });
   },
 }));

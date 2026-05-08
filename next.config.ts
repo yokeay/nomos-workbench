@@ -11,6 +11,12 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ['better-sqlite3'],
   turbopack: {},
   webpack: (config, { isServer }) => {
+    // Handle "node:" scheme imports (e.g. import from "node:buffer")
+    config.plugins.push(
+      new (require('webpack').NormalModuleReplacementPlugin)(/^node:/, (resource: any) => {
+        resource.request = resource.request.replace(/^node:/, '');
+      })
+    );
     if (isServer) {
       const origExternals = config.externals;
       config.externals = [

@@ -1,16 +1,19 @@
 'use client'
 
 import { create } from 'zustand'
+import { savePreferences } from '@/lib/preferences-client'
 
 const LS_KEY = 'nomos_news_filter'
 
 interface NewsFilterState {
   disabledSourceIds: Set<string>
+  filterVersion: number
   toggleSource: (id: string) => void
   selectAll: () => void
   deselectAll: () => void
   isEnabled: (id: string) => boolean
   load: () => void
+  loadFromServer: (disabled: Set<string>) => void
 }
 
 function loadDisabled(): Set<string> {
@@ -29,6 +32,7 @@ function persist(disabled: Set<string>) {
 
 export const useNewsFilterStore = create<NewsFilterState>((set, get) => ({
   disabledSourceIds: typeof window !== 'undefined' ? loadDisabled() : new Set(),
+  filterVersion: 0,
 
   toggleSource: (id) => {
     const next = new Set(get().disabledSourceIds)
@@ -47,19 +51,29 @@ export const useNewsFilterStore = create<NewsFilterState>((set, get) => ({
   },
 
   deselectAll: () => {
-    // We'll load all source IDs before calling this
-    // The caller passes the list; we store it
-    // Actually, let's handle this differently — the NewsFilterManager knows all IDs
+    // Handled via batchDeselectAll below — caller passes all IDs
   },
 
   isEnabled: (id) => !get().disabledSourceIds.has(id),
 
   load: () => set({ disabledSourceIds: loadDisabled() }),
+
+  loadFromServer: (disabled) => {
+    set({ disabledSourceIds: disabled, filterVersion: get().filterVersion + 1 })
+    persist(disabled)
+  },
 }))
 
-// Helper to batch-disable all given IDs
+export function batchPersist(disabledIds: Set<string>) {
+  persist(disabledIds)
+  const s = useNewsFilterStore.getState()
+  useNewsFilterStore.setState({ disabledSourceIds: disabledIds, filterVersion: s.filterVersion + 1 })
+  savePreferences({ newsFilter: JSON.stringify([...disabledIds]) })
+}
+
 export function deselectAllSources(ids: string[]) {
   const disabled = new Set(ids)
   persist(disabled)
-  useNewsFilterStore.setState({ disabledSourceIds: disabled })
+  const s = useNewsFilterStore.getState()
+  useNewsFilterStore.setState({ disabledSourceIds: disabled, filterVersion: s.filterVersion + 1 })
 }
