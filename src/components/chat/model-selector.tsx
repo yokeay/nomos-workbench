@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Select,
@@ -24,7 +25,7 @@ const shortLabels: Record<string, string> = {
   'qwen2': 'models:qwen2Short',
 };
 
-const providerGroups = [
+const builtinGroups = [
   {
     providerKey: 'models:anthropic',
     models: [
@@ -48,11 +49,44 @@ const providerGroups = [
   },
 ];
 
+type ModelDef = { value: string; labelKey: string };
+type ProviderGroup = { providerKey: string; models: ModelDef[] };
+
 export function ModelSelector({ value, onChange }: ModelSelectorProps) {
   const { t } = useTranslation();
+  const [customGroups, setCustomGroups] = useState<ProviderGroup[]>([]);
 
-  const displayLabel = value && shortLabels[value]
-    ? t(shortLabels[value])
+  useEffect(() => {
+    fetch('/api/settings/api-keys')
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.code === 0 && Array.isArray(d.data)) {
+          const groups: ProviderGroup[] = [];
+          for (const cfg of d.data) {
+            if (cfg.provider === 'custom' && Array.isArray(cfg.models) && cfg.models.length > 0) {
+              groups.push({
+                providerKey: 'models:custom',
+                models: cfg.models.map((m: string) => ({ value: m, labelKey: m })),
+              });
+            }
+          }
+          setCustomGroups(groups);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const mergedShort: Record<string, string> = { ...shortLabels };
+  for (const g of customGroups) {
+    for (const m of g.models) {
+      mergedShort[m.value] = m.value;
+    }
+  }
+
+  const allGroups = [...builtinGroups, ...customGroups];
+
+  const displayLabel = value && mergedShort[value]
+    ? t(mergedShort[value])
     : t('chat:modelSelector');
 
   return (
@@ -63,7 +97,7 @@ export function ModelSelector({ value, onChange }: ModelSelectorProps) {
         </span>
       </SelectTrigger>
       <SelectContent className="glass border-border/60 shadow-lg-soft rounded-xl p-1 animate-scale-in min-w-[200px]">
-        {providerGroups.map((group) => (
+        {allGroups.map((group) => (
           <SelectGroup key={group.providerKey}>
             <SelectLabel>{t(group.providerKey)}</SelectLabel>
             {group.models.map((model) => (

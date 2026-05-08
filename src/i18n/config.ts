@@ -173,6 +173,7 @@ export const TRANSLATIONS = {
       anthropic: 'Anthropic',
       openai: 'OpenAI',
       ollama: 'Ollama',
+      custom: '自定义',
     },
     todo: {
       title: '待办事项',
@@ -370,6 +371,7 @@ export const TRANSLATIONS = {
       anthropic: 'Anthropic',
       openai: 'OpenAI',
       ollama: 'Ollama',
+      custom: 'Custom',
     },
     todo: {
       title: 'Todos',

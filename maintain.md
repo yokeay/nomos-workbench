@@ -13,6 +13,10 @@
 - **哔哩哔哩子源标注**：3个子源分别显示为"哔哩哔哩 · 热搜""哔哩哔哩 · 热门""哔哩哔哩 · 排行榜"
 - **新闻渠道过滤保存按钮**：本地编辑状态 + 保存按钮 + 未保存提示 + Toast 反馈
 - **新闻过滤即时生效**：新增 filterVersion 计数器，保存过滤设置后即时重新过滤已显示的条目，被禁用渠道的文章立即从屏幕上消失，无需刷新页面
+- **自定义 API 供应商**：设置页 API 密钥新增「自定义」选项，支持填写自定义 Base URL + 密钥，一键刷新模型列表（调用 /v1/models 端点），获取的模型自动映射到 AI 对话框模型选择器
+  - DB 新增 `models_json` 列（migration 0005），存储自定义供应商的模型列表
+  - 新增 `/api/settings/fetch-models` 端点，服务端代理 OpenAI 兼容的模型列表请求
+  - ModelSelector 组件从 API 动态加载自定义供应商模型，与内置模型合并展示
 
 ### 影响范围
 - 数据库：新增 `nomos_dev_user_settings` 表（migration 0004），保留 `nomos_dev_storage_config` 表仅作向后兼容
@@ -32,6 +36,11 @@
 - `src/app/(dashboard)/layout.tsx` — 加入 SettingsInit 组件
 - `src/lib/newsnow/types.ts` — SourceDefinition 新增 subNames 字段
 - `src/lib/newsnow/sources.ts` — buildSources 支持 subNames + 哔哩哔哩子源标注
+- `src/app/api/settings/fetch-models/route.ts` — 新建，服务端代理 /v1/models 请求
+- `src/app/api/settings/api-keys/route.ts` — GET/POST/PUT 增加 modelsJson 字段处理
+- `drizzle/0005_models_json.sql` — 新建，ai_configs 表新增 models_json 列
+- `src/components/chat/model-selector.tsx` — 动态加载自定义供应商模型列表
+- `src/i18n/config.ts` — 新增 models:custom 翻译 key
 
 
 ## v0.2.6 - 2026-05-07

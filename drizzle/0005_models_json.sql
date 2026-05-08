@@ -1,0 +1,1 @@
+ALTER TABLE `nomos_dev_ai_configs` ADD COLUMN `models_json` text;

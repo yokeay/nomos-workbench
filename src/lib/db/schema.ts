@@ -32,6 +32,7 @@ export const aiConfigs = sqliteTable(`${BUSINESS_PREFIX}ai_configs`, {
   model: text('model').notNull(),
   apiKey: text('api_key'),
   baseUrl: text('base_url'),
+  modelsJson: text('models_json'), // JSON array of model IDs for custom providers
   isActive: integer('is_active').default(0),
   priority: integer('priority').default(0),
   createdAt: integer('created_at').notNull(),

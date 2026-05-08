@@ -244,6 +244,10 @@ function ApiKeysManager() {
   const [model, setModel] = useState('claude-3-5-sonnet-20241022');
   const [baseUrl, setBaseUrl] = useState('');
   const [saving, setSaving] = useState(false);
+  // Custom provider: fetched model list + selected models
+  const [customModels, setCustomModels] = useState<string[]>([]);
+  const [selectedModels, setSelectedModels] = useState<Set<string>>(new Set());
+  const [fetchingModels, setFetchingModels] = useState(false);
   const toast = useToast();
 
   useEffect(() => {
@@ -258,18 +262,68 @@ function ApiKeysManager() {
     } catch {}
   };
 
+  // Reset custom state when provider changes
+  useEffect(() => {
+    if (provider !== 'custom') {
+      setCustomModels([]);
+      setSelectedModels(new Set());
+    }
+  }, [provider]);
+
+  const handleFetchModels = async () => {
+    if (!baseUrl.trim() || !apiKey.trim()) {
+      toast.error('请先填写 Base URL 和 API 密钥');
+      return;
+    }
+    setFetchingModels(true);
+    try {
+      const res = await fetch('/api/settings/fetch-models', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ baseUrl: baseUrl.trim(), apiKey: apiKey.trim() }),
+      });
+      const d = await res.json();
+      if (d.code === 0 && d.data?.length > 0) {
+        setCustomModels(d.data);
+        // Pre-select all models by default
+        setSelectedModels(new Set(d.data));
+        toast.success(`已加载 ${d.data.length} 个模型`);
+      } else {
+        toast.error(d.message || '未获取到模型列表');
+      }
+    } catch {
+      toast.error('获取模型列表失败');
+    }
+    setFetchingModels(false);
+  };
+
+  const toggleModel = (m: string) => {
+    setSelectedModels(prev => {
+      const next = new Set(prev);
+      if (next.has(m)) next.delete(m); else next.add(m);
+      return next;
+    });
+  };
+
   const handleSave = async () => {
     if (!apiKey.trim()) return;
     setSaving(true);
     try {
+      const body: any = { provider, apiKey, model, baseUrl };
+      if (provider === 'custom' && selectedModels.size > 0) {
+        body.modelsJson = [...selectedModels];
+        body.model = 'custom'; // placeholder, real model picked in chat
+      }
       const res = await fetch('/api/settings/api-keys', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ provider, apiKey, model, baseUrl }),
+        body: JSON.stringify(body),
       });
       const d = await res.json();
       if (d.code === 0) {
         setApiKey('');
+        setCustomModels([]);
+        setSelectedModels(new Set());
         fetchKeys();
         toast.success(t('common:success') as string);
       } else toast.error(d.message || t('common:error') as string);
@@ -295,20 +349,35 @@ function ApiKeysManager() {
             <option value="anthropic">{t('models:anthropic')}</option>
             <option value="openai">{t('models:openai')}</option>
             <option value="ollama">{t('models:ollama')}</option>
+            <option value="custom">{t('models:custom')}</option>
           </select>
         </div>
+        {provider !== 'custom' ? (
+          <div>
+            <label className="text-xs font-medium text-muted-foreground block mb-1.5">
+              {t('settings:model')}
+            </label>
+            <Input
+              value={model}
+              onChange={(e) => setModel(e.target.value)}
+              disabled={!isLoggedIn}
+              className="h-9 bg-muted/50 border-border/60 rounded-xl text-sm focus:bg-input-background focus:border-border focus:ring-1 focus:ring-ring/20 transition-all duration-normal"
+            />
+          </div>
+        ) : null}
+      </div>
+      {provider === 'custom' && (
         <div>
-          <label className="text-xs font-medium text-muted-foreground block mb-1.5">
-            {t('settings:model')}
-          </label>
+          <label className="text-xs font-medium text-muted-foreground block mb-1.5">Base URL</label>
           <Input
-            value={model}
-            onChange={(e) => setModel(e.target.value)}
+            value={baseUrl}
+            onChange={(e) => setBaseUrl(e.target.value)}
             disabled={!isLoggedIn}
+            placeholder="https://api.example.com"
             className="h-9 bg-muted/50 border-border/60 rounded-xl text-sm focus:bg-input-background focus:border-border focus:ring-1 focus:ring-ring/20 transition-all duration-normal"
           />
         </div>
-      </div>
+      )}
       <div>
         <label className="text-xs font-medium text-muted-foreground block mb-1.5">{t('settings:apiKey')}</label>
         <Input
@@ -320,15 +389,53 @@ function ApiKeysManager() {
           placeholder="sk-..."
         />
       </div>
-      <div>
-        <label className="text-xs font-medium text-muted-foreground block mb-1.5">{t('settings:baseUrl')}</label>
-        <Input
-          value={baseUrl}
-          onChange={(e) => setBaseUrl(e.target.value)}
-          disabled={!isLoggedIn}
-          className="h-9 bg-muted/50 border-border/60 rounded-xl text-sm focus:bg-input-background focus:border-border focus:ring-1 focus:ring-ring/20 transition-all duration-normal"
-        />
-      </div>
+      {provider !== 'custom' && (
+        <div>
+          <label className="text-xs font-medium text-muted-foreground block mb-1.5">{t('settings:baseUrl')}</label>
+          <Input
+            value={baseUrl}
+            onChange={(e) => setBaseUrl(e.target.value)}
+            disabled={!isLoggedIn}
+            className="h-9 bg-muted/50 border-border/60 rounded-xl text-sm focus:bg-input-background focus:border-border focus:ring-1 focus:ring-ring/20 transition-all duration-normal"
+          />
+        </div>
+      )}
+
+      {/* Custom: fetch models button + model list */}
+      {provider === 'custom' && (
+        <div className="space-y-3">
+          <Button
+            onClick={handleFetchModels}
+            disabled={fetchingModels || !baseUrl.trim() || !apiKey.trim() || !isLoggedIn}
+            variant="secondary"
+            className="rounded-xl h-9 px-4 text-sm font-medium transition-all duration-normal"
+          >
+            {fetchingModels ? '加载中...' : '刷新模型列表'}
+          </Button>
+
+          {customModels.length > 0 && (
+            <div className="p-3 rounded-xl bg-muted/20 border border-border/30 max-h-48 overflow-y-auto">
+              <p className="text-xs font-medium text-muted-foreground mb-2">
+                已选中 {selectedModels.size}/{customModels.length} 个模型
+              </p>
+              <div className="space-y-1">
+                {customModels.map(m => (
+                  <label key={m} className="flex items-center gap-2 cursor-pointer text-xs py-1">
+                    <input
+                      type="checkbox"
+                      checked={selectedModels.has(m)}
+                      onChange={() => toggleModel(m)}
+                      className="rounded accent-foreground"
+                    />
+                    <span className="text-foreground/80">{m}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {!isLoggedIn && (
         <p className="text-[10px] text-muted-foreground/40 flex items-center gap-1">
           <LogIn className="w-3 h-3" />

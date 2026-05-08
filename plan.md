@@ -75,6 +75,7 @@
 - [x] 新闻过滤修复：setInitialCache 应用 isEnabled 过滤 ✅ 2026-05-08
 - [x] 设置页面偏好 API 重构：StorageManager/TerminalManager/NewsFilterManager ✅ 2026-05-08
 - [x] 哔哩哔哩子源标注 + 新闻过滤保存按钮 ✅ 2026-05-08
+- [x] 自定义 API 供应商：自定义 Base URL + 密钥 + 模型列表刷新 + 模型选择器动态加载 ✅ 2026-05-08
 
 ---
 
